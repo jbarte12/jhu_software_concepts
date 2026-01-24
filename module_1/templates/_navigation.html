@@ -1,0 +1,13 @@
+<nav>
+    <ul>
+        <li><a class
+                       ="{% if request.path == url_for('pages.home') %}active{% endif %}" href="{{url_for('pages.home')}}">Home</a></li>
+        <li><a
+            class
+                    ="{% if request.path == url_for('pages.contact_info') %}active{% endif %}"
+            href="{{ url_for('pages.contact_info')}}">Contact Info</a></li>
+     <li><a
+            class
+                    ="{% if request.path == url_for('pages.projects') %}active{% endif %}"
+            href="{{ url_for('pages.projects')}}">Projects</a></li>
+    </ul>
