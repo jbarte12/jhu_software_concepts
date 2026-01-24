@@ -3,7 +3,8 @@ from flask import Flask
 
 # Connect "pages" blueprint with flask project
 # Module_1.pages = folder, pages = blueprint
-from module_1.pages import pages
+from app import pages
+
 
 # Initialize app - create_app is the application factory
 def create_app():
@@ -14,4 +15,3 @@ def create_app():
 
     # Return the app
     return app
-
