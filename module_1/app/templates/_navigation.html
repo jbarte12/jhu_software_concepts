@@ -1,5 +1,10 @@
+<!-- Set up navigation links with <nav> tag -->
 <nav>
+
+    <!-- Denote a list with <ul> -->
     <ul>
+
+        <!-- Denote an item with <li> -->
         <li><a class
                        ="{% if request.path == url_for('pages.home') %}active{% endif %}" href="{{url_for('pages.home')}}">Home</a></li>
         <li><a

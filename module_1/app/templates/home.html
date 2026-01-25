@@ -1,23 +1,50 @@
+<!-- Formatting was defined in base.html - pull from that -->
 {% extends 'base.html' %}
 
+<!-- Header formatting defined in base.html, open and override -->
 {% block header %}
+
+<!-- <h1> to define main title, <h2> to define subtitle  -->
 <h1>Jayna Bartel (she/her/hers)</h1>
 <h2>Technical Project Manager, GE HealthCare </h2>
+
+<!-- Close header block  -->
 {% endblock header %}
 
-
+<!-- Main content format defined in base.html, open and override -->
 {% block content %}
+
+<!-- Pull in image, class = headshot (CSS format), message if load fails  -->
 <img class = "headshot"
      src ="{{url_for('static', filename = 'jayna_headshot.jpg')}}" alt =
 "Jayna Bartel Headshot">
-<p><strong> Education:</strong></p>
+
+<!-- Main content headers, <strong> for bold  -->
+<strong> Education:</strong>
+
+<!--Information in paragraph form below header -->
 <p>Jayna holds a B.S. in Mechanical Engineering from Marquette university.
     She is currently pursuing a M.S. in Data Science at Johns Hopkins
     University. </p>
-<p><strong> Professional Career:</strong></p>
-Jayna is currently in her third and final rotation within the Edison Program at GE Healthcare, a technical development rotational program. She currently works as a Technical Project Manager in the research apace. She has previously done rotations in mechanical design and integration and advanced manufacturing spaces.
-<p><strong> Personal:</strong></p>
-<p>Outside of work, Jayna loves spending time in the mountains skiing and hiking. You can also find her exploring local bookstores, coffee shops and spending time with friends.
-<p/>
+
+<!-- Main content headers, <strong> for bold  -->
+<strong> Professional Career:</strong>
+
+<!--Information in paragraph form below header -->
+<p>Jayna is currently in her third and final rotation within the Edison Program
+    at GE Healthcare, a technical development rotational program. She currently
+    works as a Technical Project Manager in the research space. She has
+    previously done rotations in mechanical design/integration and advanced
+    manufacturing spaces.</p>
+
+<!-- Main content headers, <strong> for bold  -->
+<strong> Personal:</strong>
+
+<!--Information in paragraph form below header -->
+<p>Outside of work, Jayna loves spending time in the mountains skiing and hiking.
+    You can also find her exploring local bookstores, coffee shops and
+    spending time with friends.<p/>
+
+<!-- Close content block  -->
 {% endblock content %}
 

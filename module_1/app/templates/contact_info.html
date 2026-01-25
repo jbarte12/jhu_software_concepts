@@ -1,13 +1,28 @@
+<!-- Formatting was defined in base.html - pull from that -->
 {% extends 'base.html' %}
 
+<!-- Header formatting defined in base.html, open and override -->
 {% block header %}
+
+<!-- Define header, <h2> to make slightly smaller  -->
 <h2>Contact Information</h2>
-<h4>Email: jbarte12@jh.edu </h4>
-<h4>Linkedin: <a
-        href="https://www.linkedin.com/in/jaynabartel/"
-        target = "blank" rel =noopener">jaynabartel
-</a></h4>
+
+<!-- Close header block  -->
 {% endblock header %}
+
+<!-- Main content format defined in base.html, open and override -->
+{% block content %}
+
+<!-- Email information, <strong> for bold, <i> for italics, <p> for breaks  -->
+<p><strong> Email:</strong> <i>jbarte12@jhu.edu</i></p>
+
+<!-- Linkedin, <a>:link, target:new page, rel: prevent external access -->
+<p><strong> Linkedin:</strong> <i><a
+        href="https://www.linkedin.com/in/jaynabartel/"
+        target="_blank" rel="noopener"> jaynabartel </a></i></p>
+
+<!-- Close content block  -->
+{% endblock content %}
 
 
 

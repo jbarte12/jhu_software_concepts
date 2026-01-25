@@ -1,12 +1,22 @@
+<!-- Formatting was defined in base.html - pull from that -->
 {% extends 'base.html' %}
 
+<!-- Header formatting defined in base.html, open and override -->
 {% block header %}
+
+<!-- Define header, <h2> to make slightly smaller  -->
 <h2>Projects</h2>
+
+<!-- Close header block  -->
 {% endblock header %}
 
-https://github.com/jbarte12/jhu_software_concepts/tree/main/module_1
+<!-- Main content format defined in base.html, open and override -->
 {% block content %}
+
+<!-- Module title/name, class used for CSS styling -->
 <p class = "module_title"> <strong>Module 1:</strong> Personal Website</p>
+
+<!-- Module description, class used for CSS styling -->
 <p class = "module_description"><strong>Description:</strong><i>
     Module 1 focused on learning how to build a website using Flask, a
     lightweight web framework for Python. Skills practiced
@@ -16,8 +26,12 @@ https://github.com/jbarte12/jhu_software_concepts/tree/main/module_1
     serves as a professional portfolio and features a homepage with personal
     information, a contact page, and a dedicated projects page. The projects
     page will be updated as work is completed throughout the course.</i><p>
+
+<!-- Github link, class:CSS styling, target: new page, rel, access control -->
 <p class = "module_description"><strong>Github:</strong> <a
         href="https://github.com/jbarte12/jhu_software_concepts/tree/main/module_1"
         target = "blank" rel = "noopener"> Link </a><p>
+
+<!-- Close content block  -->
 {% endblock content %}
 
