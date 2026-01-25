@@ -1,77 +1,80 @@
+/* This file contains styling rules */
+
+/* "*" = apply to every element, include padding & border in width/height" */
 * {
   box-sizing: border-box;
 }
 
+/* <body> content, font/size, no top/bottom margin, align text left */
 body {
-  font-family: sans-serif;
+  font-family:sans-serif;
   font-size: 20px;
   margin: 0 auto;
   text-align: left;
 }
 
-a,
-a:visited {
-  color: #007bff;
-}
-
-a:hover {
-  color: #0056b3;
-}
-
-nav ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-nav ul li {
-  display: inline;
-  margin: 0 5px;
-}
-
-/* section content - give margin on edges */
+/* <section> content - add padding around edges */
 section {
   padding: 40px;
 }
 
+/* Control font size for .module-title */
+.module_title {
+  font-size:24px;
+}
 
+/* Control font size and indent for .module_description */
+.module_description {
+  font-size:16px;
+  padding-left:20px;
+}
+
+/* Color embedded links */
+a,
+a:visited {
+  color: #4a6c7f;
+}
+
+/* Change color embedded links when hovering over */
+a:hover {
+  color: #9fc3cc;
+}
+
+
+/* Main nav bar color, space around links, spans full page  */
 .top-bar{
   background-color:#749da1;
-  padding:10px 0;
+  padding:10px 40px;
   width:100%;
 }
 
+/* Nav bar text color */
 nav a,
 nav a:visited {
-  color:white;
+  color:#F5F7F8;
 }
 
+/* Style nav links, centered, horizontal, space between  */
 nav ul {
   list-style-type:none;
   padding:0;
   margin:0;
   display:flex;
-  justify-content:center;
+  justify-content:right;
   gap:20px;
 }
 
+/* Highlight active nav links, change text color, round box edges  */
 nav a.active {
   background-color: #F5F7F8;
   color: black;
   padding: 5px 10px;
-  boarder-radius: 5px;
+  border-radius: 5px;
 }
 
+/* Format headshot styling, location, size, margin */
 .headshot {
   float: right;
   width: 350px;
   margin-right:40px;
-}
-
-.module_title {
-  font-size:24px
-}
-
-.module_description {
-  font-size:16px;
-  padding-left:20px;
 }

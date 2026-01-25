@@ -1,7 +1,7 @@
+#Import Blueprint and render_template from flask
 from flask import Blueprint, render_template
 
-# instance named bp
-# pages = name of blueprint
+# Instance named bp, blueprint name = pages
 bp = Blueprint("pages", __name__)
 
 # Create a route to the home page

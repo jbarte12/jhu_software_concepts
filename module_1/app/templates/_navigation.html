@@ -4,15 +4,19 @@
     <!-- Denote a list with <ul> -->
     <ul>
 
-        <!-- Denote an item with <li> -->
-        <li><a class
-                       ="{% if request.path == url_for('pages.home') %}active{% endif %}" href="{{url_for('pages.home')}}">Home</a></li>
-        <li><a
-            class
-                    ="{% if request.path == url_for('pages.contact_info') %}active{% endif %}"
-            href="{{ url_for('pages.contact_info')}}">Contact Info</a></li>
-     <li><a
-            class
-                    ="{% if request.path == url_for('pages.projects') %}active{% endif %}"
-            href="{{ url_for('pages.projects')}}">Projects</a></li>
+        <!-- Create nav link, if on page, add active class, name: Home -->
+        <li><a href ="{{url_for('pages.home') }}" class ="{% if request.path ==
+        url_for('pages.home') %}active{% endif %}">
+            Home</a></li>
+
+        <!-- Nav link, if on page, add active class, name: Contact Info -->
+        <li><a href ="{{url_for('pages.contact_info') }}" class ="{% if
+        request.path == url_for('pages.contact_info') %}active{% endif %}">
+            Contact Info</a></li>
+
+        <!-- Nav link, if on page, add active class, name: Projects -->
+        <li><a href ="{{url_for('pages.projects') }}" class ="{% if
+        request.path == url_for('pages.projects') %}active{% endif %}">
+            Projects</a></li>
+
     </ul>

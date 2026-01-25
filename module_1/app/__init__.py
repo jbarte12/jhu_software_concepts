@@ -1,10 +1,8 @@
 # Import flask
 from flask import Flask
 
-# Connect "pages" blueprint with flask project
-# Module_1.pages = folder, pages = blueprint
+# Connect "pages" blueprint to flask project (app = folder, pages = blueprint)
 from app import pages
-
 
 # Initialize app - create_app is the application factory
 def create_app():
