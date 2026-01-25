@@ -1,13 +1,23 @@
 {% extends 'base.html' %}
 
-# define header block (override parent)
 {% block header %}
-<h2>{% block title %}Jayna Bartel (she/her/hers){% endblock title %}</h2>
+<h1>Jayna Bartel (she/her/hers)</h1>
+<h2>Technical Project Manager, GE HealthCare </h2>
 {% endblock header %}
 
 
 {% block content %}
-<p> Technical Project Manager
-  </p>
-
+<img class = "headshot"
+     src ="{{url_for('static', filename = 'jayna_headshot.jpg')}}" alt =
+"Jayna Bartel Headshot">
+<p><strong> Education:</strong></p>
+<p>Jayna holds a B.S. in Mechanical Engineering from Marquette university.
+    She is currently pursuing a M.S. in Data Science at Johns Hopkins
+    University. </p>
+<p><strong> Professional Career:</strong></p>
+Jayna is currently in her third and final rotation within the Edison Program at GE Healthcare, a technical development rotational program. She currently works as a Technical Project Manager in the research apace. She has previously done rotations in mechanical design and integration and advanced manufacturing spaces.
+<p><strong> Personal:</strong></p>
+<p>Outside of work, Jayna loves spending time in the mountains skiing and hiking. You can also find her exploring local bookstores, coffee shops and spending time with friends.
+<p/>
 {% endblock content %}
+
