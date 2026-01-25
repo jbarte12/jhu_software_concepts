@@ -66,3 +66,12 @@ nav a.active {
   width: 350px;
   margin-right:40px;
 }
+
+.module_title {
+  font-size:24px
+}
+
+.module_description {
+  font-size:16px;
+  padding-left:20px;
+}

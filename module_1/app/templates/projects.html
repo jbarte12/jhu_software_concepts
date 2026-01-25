@@ -1,12 +1,23 @@
 {% extends 'base.html' %}
 
-# define header block (override parent)
 {% block header %}
-<h2>{% block title %}Projects{% endblock title %}</h2>
+<h2>Projects</h2>
 {% endblock header %}
 
+https://github.com/jbarte12/jhu_software_concepts/tree/main/module_1
 {% block content %}
-<p> Display projects</a>.
-  </p>
-
+<p class = "module_title"> <strong>Module 1:</strong> Personal Website</p>
+<p class = "module_description"><strong>Description:</strong><i>
+    Module 1 focused on learning how to build a website using Flask, a
+    lightweight web framework for Python. Skills practiced
+    included learning how to connect backend logic with frontend design
+    using Python to create the website structure, HTML to control the
+    layout, and CSS to define the visuals. The completed site
+    serves as a professional portfolio and features a homepage with personal
+    information, a contact page, and a dedicated projects page. The projects
+    page will be updated as work is completed throughout the course.</i><p>
+<p class = "module_description"><strong>Github:</strong> <a
+        href="https://github.com/jbarte12/jhu_software_concepts/tree/main/module_1"
+        target = "blank" rel = "noopener"> Link </a><p>
 {% endblock content %}
+
