@@ -23,10 +23,10 @@ BASE_URL = "https://www.thegradcafe.com"
 SURVEY_URL = "https://www.thegradcafe.com/survey/index.php?page={}"
 
 # Maximum number of records to scrape
-MAX_RECORDS = 100
+MAX_RECORDS = 50000
 
 # Number of parallel workers for detail pages
-NUM_WORKERS = 12
+NUM_WORKERS = 8  # reduced to avoid throttling/timeouts
 
 # HTTP timeout in seconds
 TIMEOUT = 30
@@ -34,21 +34,34 @@ TIMEOUT = 30
 # Output file for raw scraped data
 OUTPUT_FILE = "applicant_data.json"
 
-# Fetch HTML content from a URL
+
+# Fetch HTML content from a URL safely
 def _fetch_html(url):
+    """Fetch HTML from a URL, returning None on failure."""
 
-    # Build HTTP request with user-agent header
-    request = urllib.request.Request(
-        url,
-        headers={"User-Agent": "Mozilla/5.0"},
-    )
+    try:
+        # Build HTTP request with user-agent header
+        request = urllib.request.Request(
+            url,
+            headers={"User-Agent": "Mozilla/5.0"},
+        )
 
-    # Open URL and read response
-    with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
-        return response.read().decode("utf-8")
+        # Open URL and read response
+        with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+            return response.read().decode("utf-8", errors="ignore")
+
+    # Catch timeouts explicitly
+    except TimeoutError:
+        return None
+
+    # Catch all other network-related issues
+    except Exception:
+        return None
+
 
 # Clean and normalize visible text from an HTML element
 def _clean_text(element):
+    """Normalize text content from a BeautifulSoup element."""
 
     # Return empty string if element is missing
     if element is None:
@@ -57,8 +70,10 @@ def _clean_text(element):
     # Extract visible text and normalize whitespace
     return " ".join(element.get_text(" ", strip=True).split())
 
+
 # Extract value from a dt/dd pair by label
 def _extract_dt_dd(soup, label):
+    """Extract value for a given dt label from a definition list."""
 
     # Iterate through all dt elements
     for dt in soup.find_all("dt"):
@@ -76,21 +91,24 @@ def _extract_dt_dd(soup, label):
     # Return empty string if not found
     return ""
 
+
 # Extract undergraduate GPA from detail page
 def _extract_undergrad_gpa(soup):
+    """Extract and normalize undergraduate GPA."""
 
-    # Extract GPA value from dt/dd pair
+    # Extract GPA value
     gpa = _extract_dt_dd(soup, "Undergrad GPA")
 
     # Normalize placeholder zero values
     if gpa in {"0", "0.0", "0.00"}:
         return ""
 
-    # Return cleaned GPA
     return gpa
+
 
 # Extract GRE scores from detail page
 def _extract_gre_scores(soup):
+    """Extract GRE scores from detail page."""
 
     # Initialize GRE fields
     scores = {
@@ -105,21 +123,21 @@ def _extract_gre_scores(soup):
     # Iterate through span elements with index
     for i, span in enumerate(spans):
 
-        # Extract and normalize label text
+        # Normalize label text
         label = _clean_text(span).lower()
 
         # Skip non-label spans
         if not label.endswith(":"):
             continue
 
-        # Ensure a value span exists
+        # Ensure value span exists
         if i + 1 >= len(spans):
             continue
 
         # Extract value text
         value = _clean_text(spans[i + 1])
 
-        # Normalize placeholder zero values
+        # Normalize placeholder values
         if value in {"0", "0.0", "0.00"}:
             value = ""
 
@@ -135,22 +153,29 @@ def _extract_gre_scores(soup):
         elif label.startswith("analytical writing"):
             scores["gre_analytical_writing"] = value
 
-    # Return extracted GRE scores
     return scores
+
 
 # Scrape an individual GradCafe result page
 def _scrape_detail_page(result_id):
+    """Scrape detailed fields for a single result."""
 
     # Build detail page URL
     url = f"{BASE_URL}/result/{result_id}"
 
-    # Fetch and parse HTML
-    soup = BeautifulSoup(_fetch_html(url), "html.parser")
+    # Fetch HTML safely
+    html = _fetch_html(url)
+
+    # Skip if page failed to load
+    if not html:
+        return {}
+
+    # Parse HTML
+    soup = BeautifulSoup(html, "html.parser")
 
     # Extract GRE scores
     gre = _extract_gre_scores(soup)
 
-    # Return extracted detail fields
     return {
         "program_name": _extract_dt_dd(soup, "Program"),
         "degree_type": _extract_dt_dd(soup, "Degree Type"),
@@ -161,41 +186,35 @@ def _scrape_detail_page(result_id):
         "gre_analytical_writing": gre["gre_analytical_writing"],
     }
 
+
 # Parse a GradCafe survey page
 def _parse_survey_page(html):
+    """Parse a GradCafe survey page into structured records."""
 
-    # Parse HTML into BeautifulSoup
+    # Return empty list if page failed
+    if not html:
+        return []
+
+    # Parse HTML
     soup = BeautifulSoup(html, "html.parser")
 
     # Locate all table rows
     rows = soup.find_all("tr")
 
-    # Initialize result list
     results = []
-
-    # Track current record for metadata rows
     current = None
 
-    # Iterate through table rows
     for row in rows:
-
-        # Extract table cells
         cells = row.find_all("td")
 
         # Detect main result row
         if len(cells) >= 4:
-
-            # Locate result link
             link = row.find("a", href=re.compile(r"/result/"))
-
-            # Skip rows without result links
             if not link:
                 continue
 
-            # Extract result ID
             result_id = link["href"].split("/")[-1]
 
-            # Initialize new record
             current = {
                 "result_id": result_id,
                 "university": _clean_text(cells[0]),
@@ -213,100 +232,73 @@ def _parse_survey_page(html):
                 "gpa": "",
             }
 
-            # Append new record
             results.append(current)
 
-        # Process metadata rows
+        # Parse metadata rows
         if current:
-
-            # Iterate through all div elements
             for div in row.find_all("div"):
-
-                # Extract visible text
                 text = _clean_text(div)
 
-                # Match academic term
                 if re.search(r"(Fall|Spring|Summer|Winter)\s+\d{4}", text):
                     current["start_term"] = text
-
-                # Match citizenship status
                 elif text.lower() in {"international", "us", "u.s.", "american"}:
                     current["International/US"] = (
                         "International" if "inter" in text.lower() else "US"
                     )
 
-    # Return parsed records
     return results
+
 
 # Scrape survey pages and detail pages
 def scrape_data():
+    """Scrape GradCafe survey and detail pages."""
 
-    # Record scrape start time
     start_time = time.time()
 
-    # Initialize record storage
     all_results = []
-
-    # Track seen result IDs
     seen_ids = set()
-
-    # Initialize page counter
     page = 1
 
-    # Loop until max records reached
+    # Scrape survey pages
     while len(all_results) < MAX_RECORDS:
-
-        # Fetch survey page HTML
         html = _fetch_html(SURVEY_URL.format(page))
-
-        # Parse survey page
         page_results = _parse_survey_page(html)
 
-        # Stop if no results found
         if not page_results:
             break
 
-        # Add new records
         for result in page_results:
             if result["result_id"] not in seen_ids:
                 seen_ids.add(result["result_id"])
                 all_results.append(result)
 
-            # Stop collecting records once max count is achieved
             if len(all_results) >= MAX_RECORDS:
                 break
 
-        # Advance to next page
         page += 1
 
-    # Scrape detail pages in parallel
+    # Scrape detail pages in parallel (safe)
     with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
         details = executor.map(
             _scrape_detail_page,
             [r["result_id"] for r in all_results],
         )
 
-    # Merge detail data into records
-    for record, detail in zip(all_results, details):
+    # Merge detail data safely
+    for record, detail in zip(all_results, details, strict=False):
         record.update(detail)
 
-    # Record scrape end time
-    end_time = time.time()
+    elapsed = time.time() - start_time
+    print(f"Scraping completed in {elapsed:.2f} seconds")
 
-    # Print elapsed time
-    print(f"Scraping completed in {end_time - start_time:.2f} seconds")
-
-    # Return final dataset
     return all_results
+
 
 # Save scraped data to disk
 def save_data(data):
+    """Save scraped records to disk as JSON."""
 
-    # Open output file
     with open(OUTPUT_FILE, "w", encoding="utf-8") as file:
-
-        # Write formatted JSON
         json.dump(data, file, indent=2, ensure_ascii=False)
 
-    # Print confirmation message
     print(f"Saved {len(data)} records to {OUTPUT_FILE}")
