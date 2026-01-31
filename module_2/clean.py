@@ -1,129 +1,127 @@
-"""
-clean.py
-
-This module is responsible ONLY for:
-- Loading scraped applicant data from a JSON file
-- Cleaning and restructuring that data into a consistent format
-- Saving the cleaned data back to the same JSON file
-
-IMPORTANT:
-- No web scraping should happen in this file
-- This file only works with local JSON data
-"""
-
-# Import the built-in json module so we can read and write JSON files
+# Import JSON utilities
 import json
 
+# Import regular expressions for date parsing
+import re
 
-# Name of the JSON file that stores applicant data
-# This file must already exist before this script runs
-DATA_FILE = "applicant_data.json"
+# Input file containing raw scraped data
+RAW_FILE = "applicant_data.json"
+
+# Output file containing cleaned applicant data
+OUT_FILE = "applicant_data.json"
 
 
+# Load raw applicant data from disk
 def load_data():
-    """
-    Load applicant data from applicant_data.json.
 
-    This function:
-    - Opens the JSON file from disk
-    - Parses the JSON into Python objects
-    - Returns the data as a list of dictionaries
+    # Open raw data file
+    with open(RAW_FILE, "r", encoding="utf-8") as f:
 
-    Raises:
-        FileNotFoundError:
-            If the JSON file does not exist yet
-    """
+        # Parse JSON into Python objects
+        return json.load(f)
 
-    # Begin a try/except block to handle missing files cleanly
-    try:
 
-        # Open the JSON file in read mode using UTF-8 encoding
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
+# Normalize text values and guarantee string output
+def _norm(value):
 
-            # Convert the JSON text into Python data structures
-            # (lists and dictionaries) and return it
-            return json.load(f)
+    # Return empty string if value is missing or empty
+    if not value:
+        return ""
 
-    # Catch the specific error that occurs if the file is missing
-    except FileNotFoundError:
+    # Normalize whitespace
+    return " ".join(value.split())
 
-        # Re-raise the error with a clearer, user-friendly message
-        raise FileNotFoundError(
-            "applicant_data.json not found. Run main.py first."
+
+# Normalize applicant status values and fix decision dates
+def _normalize_status(status):
+
+    # Return empty string if status is missing
+    if not status:
+        return ""
+
+    # Normalize case for matching
+    lower = status.lower()
+
+    # Handle waitlist
+    if "wait" in lower:
+        return "Waitlisted"
+
+    # Handle interview
+    if "interview" in lower:
+        return "Interview"
+
+    # Handle accepted / rejected with date
+    if lower.startswith("accepted") or lower.startswith("rejected"):
+
+        # Extract decision word
+        decision = status.split()[0].rstrip(":")
+
+        # Match day + month anywhere in string
+        match = re.search(
+            r"\b(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b",
+            status
         )
 
+        # If no date found, return decision only
+        if not match:
+            return decision
 
-def clean_data(raw_data):
-    """
-    Convert raw scraped applicant records into a clean,
-    structured, and consistent format.
+        # Extract day and month
+        day = match.group(1)
+        month = match.group(2)
 
-    Parameters:
-        raw_data (list):
-            A list of dictionaries containing raw scraped applicant data
+        # Month-based year inference
+        if month in {"Jan", "Feb"}:
+            year = "2026"
+        else:
+            year = "2025"
 
-    Returns:
-        list:
-            A new list of cleaned dictionaries with a standardized schema
-    """
+        return f"{decision}: {day} {month} {year}"
 
-    # Create an empty list to store cleaned applicant records
+    # Preserve anything else as-is
+    return status
+
+
+# Convert raw records into final schema
+def clean_data(raw_records):
+
+    # Storage for cleaned records
     cleaned = []
 
-    # Iterate through each raw applicant record
-    for record in raw_data:
+    # Iterate through raw records
+    for r in raw_records:
 
-        # Append a newly cleaned dictionary to the cleaned list
+        # Append normalized record
         cleaned.append({
-
-            # Combine program name and school into a single readable field
-            "program": f'{record.get("program", "")}, {record.get("school", "")}',
-
-            # Rename the raw "notes" field to "comments"
-            "comments": record.get("notes", ""),
-
-            # Rename "added_on" to the more descriptive "date_added"
-            "date_added": record.get("added_on", ""),
-
-            # Construct a full GradCafe result URL using the result ID
-            "url": f'https://www.thegradcafe.com/result/{record.get("result_id")}',
-
-            # Rename "decision" to "status"
-            "status": record.get("decision", ""),
-
-            # Rename "start_term" to "term"
-            "term": record.get("start_term", ""),
-
-            # Preserve citizenship field using a clear label
-            "US/International": record.get("citizenship", ""),
-
-            # Rename "degree_type" to "degree"
-            "degree": record.get("degree_type", "")
+            "program_name": _norm(r.get("program_name")),
+            "university": _norm(r.get("university")),
+            "degree_type": _norm(r.get("degree_type")),
+            "comments": _norm(r.get("comments")),
+            "date_added": _norm(r.get("date_added")),
+            "url_link": _norm(r.get("url_link")),
+            "applicant_status": _normalize_status(
+                _norm(r.get("applicant_status"))
+            ),
+            "start_term": _norm(r.get("start_term")),
+            "International/US": _norm(r.get("International/US")),
+            "gre_general": _norm(r.get("gre_general")),
+            "gre_verbal": _norm(r.get("gre_verbal")),
+            "gre_analytical_writing": _norm(r.get("gre_analytical_writing")),
+            "gpa": _norm(r.get("gpa")),
         })
 
-    # Return the fully cleaned list of applicant records
+    # Return cleaned dataset
     return cleaned
 
 
+# Save cleaned applicant data to disk
 def save_data(data):
-    """
-    Save cleaned applicant data back to applicant_data.json.
 
-    This function:
-    - Overwrites the existing file
-    - Writes formatted JSON for readability
-    """
+    # Open output file
+    with open(OUT_FILE, "w", encoding="utf-8") as f:
 
-    # Open the JSON file in write mode using UTF-8 encoding
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        # Write formatted JSON
+        json.dump(data, f, indent=2, ensure_ascii=False)
 
-        # Serialize the cleaned Python data into JSON format
-        json.dump(
-            data,               # The cleaned applicant data
-            f,                  # The file object to write to
-            indent=2,           # Indent JSON for human readability
-            ensure_ascii=False  # Preserve non-ASCII characters
-        )
-
-    # Print confirmation message indicating success
-    print("Cleaned data saved to applicant_data.json")
+    # Confirmation message
+    print(f"Cleaned data saved to {OUT_FILE}")
