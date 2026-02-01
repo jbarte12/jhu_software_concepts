@@ -29,13 +29,13 @@ SURVEY_URL = "https://www.thegradcafe.com/survey/index.php?page={}"
 MAX_RECORDS = 50000
 
 # Number of parallel workers for detail-page scraping
-NUM_WORKERS = 10
+NUM_WORKERS = 6
 
 # HTTP timeout in seconds
 TIMEOUT = 30
 
 # Output JSON file
-OUTPUT_FILE = "applicant_data.json"
+OUTPUT_FILE = "applicant_data_test.json"
 
 # Progress logging interval
 PROGRESS_INTERVAL = 500

@@ -5,10 +5,10 @@ import json
 import re
 
 # Input file containing raw scraped data
-RAW_FILE = "applicant_data.json"
+RAW_FILE = "applicant_data_test.json"
 
 # Output file containing cleaned applicant data
-OUT_FILE = "applicant_data.json"
+OUT_FILE = "applicant_data_test.json"
 
 
 # Load raw applicant data from disk
