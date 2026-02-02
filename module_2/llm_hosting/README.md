@@ -46,3 +46,6 @@ export MODEL_FILE=tinyllama-1.1b-chat-v1.0.Q3_K_M.gguf
 ## Notes
 - Strict JSON prompting + a rules-first fallback keep tiny models on task.
 - Extend the few-shots and the fallback patterns in `app.py` for higher accuracy on your dataset.
+- Added University of Wisconsin - Milwaukee to the canon_universities 
+- Universities with special spelling (ex: McMaster) will standardize 
+  incorrectly to Mcmaster 

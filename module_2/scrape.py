@@ -26,7 +26,7 @@ SURVEY_URL = "https://www.thegradcafe.com/survey/index.php?page={}"
 MAX_RECORDS = 30000
 
 # Number of parallel workers for detail pages
-NUM_WORKERS = 12
+NUM_WORKERS = 2
 
 # HTTP timeout in seconds
 TIMEOUT = 30
@@ -35,17 +35,19 @@ TIMEOUT = 30
 OUTPUT_FILE = "applicant_data.json"
 
 # Fetch HTML content from a URL
-def _fetch_html(url):
-
-    # Build HTTP request with user-agent header
-    request = urllib.request.Request(
-        url,
-        headers={"User-Agent": "Mozilla/5.0"},
-    )
-
-    # Open URL and read response
-    with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
-        return response.read().decode("utf-8")
+def _fetch_html(url, retries=3):
+    for attempt in range(retries):
+        try:
+            request = urllib.request.Request(
+                url,
+                headers={"User-Agent": "Mozilla/5.0"},
+            )
+            with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+                return response.read().decode("utf-8")
+        except Exception:
+            if attempt == retries - 1:
+                raise
+            time.sleep(2 * (attempt + 1))
 
 # Clean and normalize visible text from an HTML element
 def _clean_text(element):

@@ -70,13 +70,8 @@ def _normalize_status(status):
         day = match.group(1)
         month = match.group(2)
 
-        # Month-based year inference
-        if month in {"Jan", "Feb"}:
-            year = "2026"
-        else:
-            year = "2025"
-
-        return f"{decision}: {day} {month} {year}"
+        # Return accepted/rejected in decision: day month form
+        return f"{decision}: {day} {month}"
 
     # Preserve anything else as-is
     return status
