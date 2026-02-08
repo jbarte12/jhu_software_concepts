@@ -1,0 +1,13 @@
+<!-- Set up navigation links with <nav> tag -->
+<nav>
+
+    <!-- Denote a list with <ul> -->
+    <ul>
+
+        <!-- Create nav link, if on page, add active class, name: Home -->
+        <li><a href ="{{url_for('pages.grad_cafe') }}" class
+                ="{% if request.path ==
+        url_for('pages.grad_cafe') %}active{% endif %}">
+            Gradcafe</a></li>
+
+    </ul>

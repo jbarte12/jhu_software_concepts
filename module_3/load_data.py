@@ -70,6 +70,21 @@ def safe_value(value):
     return value
 
 
+def safe_float(value):
+    # Check if value is empty or None
+    if value is None or value == "":
+        # Return None for empty values
+        return None
+    # Try to convert to float
+    try:
+        # Return float value
+        return float(value)
+    # Handle non-numeric values
+    except ValueError:
+        # Return None if conversion fails
+        return None
+
+
 def convert_date(value):
     # Return None for empty values
     if safe_value(value) is None:
@@ -136,7 +151,7 @@ execute_query(connection, "TRUNCATE grad_applications RESTART IDENTITY;")
 records = []
 
 # Open the NDJSON file line-by-line
-with open("scrape/llm_extend_applicant_data.json", "r") as file:
+with open("llm_extend_applicant_data.json", "r") as file:
     # Loop through each line in the file
     for line in file:
         # Parse the JSON object from the line
@@ -160,10 +175,10 @@ with open("scrape/llm_extend_applicant_data.json", "r") as file:
             safe_value(json_data.get("applicant_status")),
             safe_value(json_data.get("start_term")),
             safe_value(json_data.get("International/US")),
-            safe_value(json_data.get("gpa")),
-            safe_value(json_data.get("gre_general")),
-            safe_value(json_data.get("gre_verbal")),
-            safe_value(json_data.get("gre_analytical_writing")),
+            safe_float(json_data.get("gpa")),
+            safe_float(json_data.get("gre_general")),
+            safe_float(json_data.get("gre_verbal")),
+            safe_float(json_data.get("gre_analytical_writing")),
             safe_value(json_data.get("degree_type")),
             safe_value(json_data.get("llm-generated-program")),
             safe_value(json_data.get("llm-generated-university")),

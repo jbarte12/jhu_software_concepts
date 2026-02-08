@@ -1,5 +1,5 @@
 # Import scraping module for collecting raw GradCafe data
-from module_3.scrape import scrape
+import scrape
 
 # Import cleaning module for normalizing scraped data
 import clean

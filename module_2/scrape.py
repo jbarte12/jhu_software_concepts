@@ -26,13 +26,17 @@ SURVEY_URL = "https://www.thegradcafe.com/survey/index.php?page={}"
 MAX_RECORDS = 30000
 
 # Number of parallel workers for detail pages
-NUM_WORKERS = 2
+NUM_WORKERS = 10
 
 # HTTP timeout in seconds
 TIMEOUT = 30
 
 # Output file for raw scraped data
 OUTPUT_FILE = "applicant_data.json"
+
+# Save every N records
+SAVE_EVERY = 1000
+
 
 # Fetch HTML content from a URL
 def _fetch_html(url, retries=3):
@@ -49,6 +53,7 @@ def _fetch_html(url, retries=3):
                 raise
             time.sleep(2 * (attempt + 1))
 
+
 # Clean and normalize visible text from an HTML element
 def _clean_text(element):
 
@@ -58,6 +63,7 @@ def _clean_text(element):
 
     # Extract visible text and normalize whitespace
     return " ".join(element.get_text(" ", strip=True).split())
+
 
 # Extract value from a dt/dd pair by label
 def _extract_dt_dd(soup, label):
@@ -78,6 +84,7 @@ def _extract_dt_dd(soup, label):
     # Return empty string if not found
     return ""
 
+
 # Extract undergraduate GPA from detail page
 def _extract_undergrad_gpa(soup):
 
@@ -85,11 +92,12 @@ def _extract_undergrad_gpa(soup):
     gpa = _extract_dt_dd(soup, "Undergrad GPA")
 
     # Normalize placeholder zero values
-    if gpa in {"0", "0.0", "0.00"}:
+    if gpa in {"0", "0.0", "0.00", "99.99"}:
         return ""
 
     # Return cleaned GPA
     return gpa
+
 
 # Extract GRE scores from detail page
 def _extract_gre_scores(soup):
@@ -122,7 +130,7 @@ def _extract_gre_scores(soup):
         value = _clean_text(spans[i + 1])
 
         # Normalize placeholder zero values
-        if value in {"0", "0.0", "0.00"}:
+        if value in {"0", "0.0", "0.00", "99.99"}:
             value = ""
 
         # Assign GRE General score
@@ -139,6 +147,7 @@ def _extract_gre_scores(soup):
 
     # Return extracted GRE scores
     return scores
+
 
 # Scrape an individual GradCafe result page
 def _scrape_detail_page(result_id):
@@ -162,6 +171,7 @@ def _scrape_detail_page(result_id):
         "gre_verbal": gre["gre_verbal"],
         "gre_analytical_writing": gre["gre_analytical_writing"],
     }
+
 
 # Parse a GradCafe survey page
 def _parse_survey_page(html):
@@ -240,6 +250,7 @@ def _parse_survey_page(html):
     # Return parsed records
     return results
 
+
 # Scrape survey pages and detail pages
 def scrape_data():
 
@@ -289,8 +300,16 @@ def scrape_data():
         )
 
     # Merge detail data into records
+    completed = 0
     for record, detail in zip(all_results, details):
         record.update(detail)
+        completed += 1
+
+        # Save progress every SAVE_EVERY records
+        if completed % SAVE_EVERY == 0:
+            with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+                json.dump(all_results, f, indent=2, ensure_ascii=False)
+            print(f"Saved {completed} records to {OUTPUT_FILE}")
 
     # Record scrape end time
     end_time = time.time()
@@ -300,6 +319,7 @@ def scrape_data():
 
     # Return final dataset
     return all_results
+
 
 # Save scraped data to disk
 def save_data(data):

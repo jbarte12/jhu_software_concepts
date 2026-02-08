@@ -1,0 +1,133 @@
+/* This file contains styling rules */
+
+/* Apply box sizing to everything */
+* {
+  box-sizing: border-box;
+}
+
+/* Body styling */
+body {
+  font-family: sans-serif;
+  font-size: 20px;
+  margin: 0;
+  text-align: left;
+  background: #f7f7f7;
+}
+
+/* Top navigation bar */
+.top-bar {
+  background-color: #749da1;
+  padding: 10px 40px;
+  width: 100%;
+}
+
+/* Nav link styling */
+nav a,
+nav a:visited {
+  color: #F5F7F8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* Nav list layout */
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: right;
+  gap: 20px;
+}
+
+/* Active nav link */
+nav a.active {
+  background-color: #F5F7F8;
+  color: black;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+/* Page section padding */
+section {
+  padding: 40px;
+}
+
+/* Module title */
+.module_title {
+  font-size: 24px;
+}
+
+/* Module description */
+.module_description {
+  font-size: 16px;
+  padding-left: 20px;
+}
+
+/* Link colors */
+a,
+a:visited {
+  color: #4a6c7f;
+}
+
+a:hover {
+  color: #9fc3cc;
+}
+
+/* Stats container */
+.stats-container {
+  background: white;
+  padding: 25px;
+  margin-top: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+/* Individual stat card */
+.stat-card {
+  background: #f1f8f9;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+/* Stat title */
+.stat-title {
+  font-size: 16px;
+  color: #3a5f68;
+}
+
+/* Stat value */
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+/* Make it responsive */
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Button styling to match nav */
+.btn-refresh {
+  background-color: #749da1;
+  color: #F5F7F8;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* slightly darker hover */
+.btn-refresh:hover {
+  background-color: #5f8d92;   /* slightly darker hover */
+}

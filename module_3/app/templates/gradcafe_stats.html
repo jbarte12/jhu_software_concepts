@@ -1,0 +1,57 @@
+<!-- Inherit layout, styles, and structure from base.html -->
+{% extends 'base.html' %}
+
+<!-- Open header block -->
+{% block header %}
+
+<!-- Page title -->
+<h2>GradCafe Application Statistics</h2>
+
+<!-- Close header block -->
+{% endblock header %}
+
+<!-- Open main content block -->
+{% block content %}
+
+<!-- Display Fall 2026 applicant count -->
+<p><strong>Fall 2026 Applicants:</strong> <em>{{ stats.fall_2026_count }}</em></p>
+
+<!-- Display percentage of international applicants -->
+<p><strong>International Applicants (%):</strong> <em>{{ stats.international_pct }}%</em></p>
+
+<!-- Display average GPA -->
+<p><strong>Average GPA:</strong> <em>{{ stats.avg_gpa }}</em></p>
+
+<!-- Display average GRE score -->
+<p><strong>Average GRE:</strong> <em>{{ stats.avg_gre }}</em></p>
+
+<!-- Display average GRE Verbal score -->
+<p><strong>Average GRE Verbal:</strong> <em>{{ stats.avg_gre_v }}</em></p>
+
+<!-- Display average GRE Analytical Writing score -->
+<p><strong>Average GRE AW:</strong> <em>{{ stats.avg_gre_aw }}</em></p>
+
+<!-- Display average GPA for US applicants in Fall 2026 -->
+<p><strong>Average GPA (US, Fall 2026):</strong> <em>{{ stats.avg_gpa_us_fall_2026 }}</em></p>
+
+<!-- Display Fall 2025 acceptance rate -->
+<p><strong>Fall 2025 Acceptance Rate (%):</strong> <em>{{ stats.fall_2025_accept_pct }}%</em></p>
+
+<!-- Display average GPA of accepted Fall 2026 applicants -->
+<p><strong>Average GPA of Accepted Fall 2026 Applicants:</strong> <em>{{ stats.avg_gpa_fall_2026_accept }}</em></p>
+
+<!-- Display number of JHU CS Master's applicants -->
+<p><strong>JHU CS Master’s Applicants:</strong> <em>{{ stats.jhu_cs_masters }}</em></p>
+
+<!-- Display Fall 2026 PhD CS acceptances using raw dataset fields -->
+<p><strong>Fall 2026 PhD CS Acceptances (Georgetown/MIT/Stanford/CMU), Raw Data:</strong> <em>{{ stats.fall_2026_cs_accept }}</em></p>
+
+<!-- Display Fall 2026 PhD CS acceptances using LLM-generated fields -->
+<p><strong>Fall 2026 PhD CS Acceptances (Georgetown/MIT/Stanford/CMU), LLM Data:</strong> <em>{{ stats.fall_2026_cs_accept_llm }}</em></p>
+
+<form action="{{ url_for('pages.refresh_gradcafe') }}" method="post">
+    <button class="btn-refresh" type="submit">Refresh GradCafe Data</button>
+</form>
+
+<!-- Close main content block -->
+{% endblock content %}

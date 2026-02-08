@@ -1,65 +1,93 @@
-# Import the database connection function from load_data.py
+# Import the database connection helper from load_data.py
 from load_data import create_connection
 
 
-# Define a helper to run a query and return a single value
+# Define a helper function to run a query and return a single value
 def fetch_value(connection, query):
-    # Create a cursor for the query
+    # Create a cursor object for database interaction
     cursor = connection.cursor()
-    # Execute the query
+
+    # Execute the SQL query
     cursor.execute(query)
-    # Return the first value from the first row
+
+    # Fetch the first column of the first row
     return cursor.fetchone()[0]
 
 
-# Define a helper to run a query and return a tuple
+# Define a helper function to run a query and return an entire row
 def fetch_row(connection, query):
-    # Create a cursor for the query
+    # Create a cursor object for database interaction
     cursor = connection.cursor()
-    # Execute the query
+
+    # Execute the SQL query
     cursor.execute(query)
-    # Return the full row
+
+    # Fetch and return the full row
     return cursor.fetchone()
 
 
-# Define a function to run all analytics queries
-def run_queries(connection):
-    # Question 1: How many entries for Fall 2026?
+# Define the main analytics function used by Flask
+def get_application_stats():
+    # Create a database connection using shared credentials
+    connection = create_connection(
+        "sm_app",
+        "postgres",
+        "abc123",
+        "127.0.0.1",
+        "5432"
+    )
+
+    # Count applications for Fall 2026
     fall_2026_count = fetch_value(
         connection,
         "SELECT COUNT(*) FROM grad_applications WHERE term = 'Fall 2026';"
     )
 
-    # Question 2: Percent international (not US / Other)
+    # Count total applications
     total_count = fetch_value(
         connection,
         "SELECT COUNT(*) FROM grad_applications;"
     )
 
+    # Count international applicants
     international_count = fetch_value(
         connection,
-        "SELECT COUNT(*) FROM grad_applications WHERE LOWER(us_or_international) = 'international';"
+        """
+        SELECT COUNT(*)
+        FROM grad_applications
+        WHERE LOWER(us_or_international) = 'international';
+        """
     )
 
+    # Compute percentage of international applicants
     international_pct = round((international_count / total_count) * 100, 2)
 
-    # Question 3: Average GPA, GRE, GRE V, GRE AW
+    # Compute average GPA, GRE, GRE Verbal, GRE AW
     avg_gpa, avg_gre, avg_gre_v, avg_gre_aw = fetch_row(
         connection,
         """
-        SELECT AVG(gpa), AVG(gre), AVG(gre_v), AVG(gre_aw)
-        FROM grad_applications
-        WHERE gpa IS NOT NULL OR gre IS NOT NULL OR gre_v IS NOT NULL OR gre_aw IS NOT NULL;
+        SELECT
+            AVG(gpa),
+            AVG(gre),
+            AVG(gre_v),
+            AVG(gre_aw)
+        FROM grad_applications;
         """
     )
 
-    # Round averages to 2 decimals if they exist
+    # Round GPA average if it exists
     avg_gpa = round(avg_gpa, 2) if avg_gpa is not None else None
+
+    # Round GRE average if it exists
     avg_gre = round(avg_gre, 2) if avg_gre is not None else None
+
+    # Round GRE verbal average if it exists
     avg_gre_v = round(avg_gre_v, 2) if avg_gre_v is not None else None
+
+    # Round GRE analytical writing average if it exists
     avg_gre_aw = round(avg_gre_aw, 2) if avg_gre_aw is not None else None
 
-    # Question 4: Average GPA of American students in Fall 2026
+    # Compute average GPA of US students applying Fall 2026
     avg_gpa_us_fall_2026 = fetch_value(
         connection,
         """
@@ -71,14 +99,20 @@ def run_queries(connection):
         """
     )
 
-    avg_gpa_us_fall_2026 = round(avg_gpa_us_fall_2026, 2) if avg_gpa_us_fall_2026 is not None else None
+    # Round US GPA average if it exists
+    avg_gpa_us_fall_2026 = (
+        round(avg_gpa_us_fall_2026, 2)
+        if avg_gpa_us_fall_2026 is not None
+        else None
+    )
 
-    # Question 5: Percent Fall 2025 entries that are acceptances
+    # Count total Fall 2025 applications
     fall_2025_total = fetch_value(
         connection,
         "SELECT COUNT(*) FROM grad_applications WHERE term = 'Fall 2025';"
     )
 
+    # Count Fall 2025 acceptances
     fall_2025_accept = fetch_value(
         connection,
         """
@@ -89,9 +123,13 @@ def run_queries(connection):
         """
     )
 
-    fall_2025_accept_pct = round((fall_2025_accept / fall_2025_total) * 100, 2)
+    # Compute Fall 2025 acceptance rate
+    fall_2025_accept_pct = round(
+        (fall_2025_accept / fall_2025_total) * 100,
+        2
+    )
 
-    # Question 6: Avg GPA of Fall 2026 acceptances
+    # Compute average GPA of Fall 2026 accepted applicants
     avg_gpa_fall_2026_accept = fetch_value(
         connection,
         """
@@ -103,9 +141,14 @@ def run_queries(connection):
         """
     )
 
-    avg_gpa_fall_2026_accept = round(avg_gpa_fall_2026_accept, 2) if avg_gpa_fall_2026_accept is not None else None
+    # Round accepted GPA average if it exists
+    avg_gpa_fall_2026_accept = (
+        round(avg_gpa_fall_2026_accept, 2)
+        if avg_gpa_fall_2026_accept is not None
+        else None
+    )
 
-    # Question 7: JHU Masters Computer Science count
+    # Count JHU Masters Computer Science applications
     jhu_cs_masters = fetch_value(
         connection,
         """
@@ -117,7 +160,7 @@ def run_queries(connection):
         """
     )
 
-    # Question 8: Fall 2026 acceptances at target schools (PhD CS)
+    # Count Fall 2026 PhD CS acceptances at target schools
     fall_2026_cs_accept = fetch_value(
         connection,
         """
@@ -136,7 +179,7 @@ def run_queries(connection):
         """
     )
 
-    # Question 9: Same as Q8 but using LLM-generated fields
+    # Count same acceptances using LLM-generated fields
     fall_2026_cs_accept_llm = fetch_value(
         connection,
         """
@@ -155,26 +198,33 @@ def run_queries(connection):
         """
     )
 
-    # Print results
-    print("\n----- RESULTS -----")
-    print("1) Fall 2026 count:", fall_2026_count)
-    print("2) International %:", international_pct)
-    print(
-        "3) Avg GPA:", avg_gpa,
-        "| GRE:", avg_gre,
-        "| GRE V:", avg_gre_v,
-        "| GRE AW:", avg_gre_aw
-    )
-    print("4) Avg GPA (US Fall 2026):", avg_gpa_us_fall_2026)
-    print("5) Fall 2025 Acceptance %:", fall_2025_accept_pct)
-    print("6) Avg GPA (Fall 2026 Acceptances):", avg_gpa_fall_2026_accept)
-    print("7) JHU Masters CS count:", jhu_cs_masters)
-    print("8) Fall 2026 PhD CS acceptances:", fall_2026_cs_accept)
-    print("9) Fall 2026 PhD CS acceptances (LLM):", fall_2026_cs_accept_llm)
+    # Print all computed stats
+    print(f"fall_2026_count: {fall_2026_count}")
+    print(f"international_pct: {international_pct}")
+    print(f"avg_gpa: {avg_gpa}")
+    print(f"avg_gre: {avg_gre}")
+    print(f"avg_gre_v: {avg_gre_v}")
+    print(f"avg_gre_aw: {avg_gre_aw}")
+    print(f"avg_gpa_us_fall_2026: {avg_gpa_us_fall_2026}")
+    print(f"fall_2025_accept_pct: {fall_2025_accept_pct}")
+    print(f"avg_gpa_fall_2026_accept: {avg_gpa_fall_2026_accept}")
+    print(f"jhu_cs_masters: {jhu_cs_masters}")
+    print(f"fall_2026_cs_accept: {fall_2026_cs_accept}")
+    print(f"fall_2026_cs_accept_llm: {fall_2026_cs_accept_llm}")
 
+    # Return all computed statistics as a dictionary for Flask
+    return {
+        "fall_2026_count": fall_2026_count,
+        "international_pct": international_pct,
+        "avg_gpa": avg_gpa,
+        "avg_gre": avg_gre,
+        "avg_gre_v": avg_gre_v,
+        "avg_gre_aw": avg_gre_aw,
+        "avg_gpa_us_fall_2026": avg_gpa_us_fall_2026,
+        "fall_2025_accept_pct": fall_2025_accept_pct,
+        "avg_gpa_fall_2026_accept": avg_gpa_fall_2026_accept,
+        "jhu_cs_masters": jhu_cs_masters,
+        "fall_2026_cs_accept": fall_2026_cs_accept,
+        "fall_2026_cs_accept_llm": fall_2026_cs_accept_llm
+    }
 
-# Create connection using the same settings as load_data.py
-connection = create_connection("sm_app", "postgres", "abc123", "127.0.0.1", "5432")
-
-# Run all analytics
-run_queries(connection)
