@@ -8,8 +8,10 @@ from app import pages
 def create_app():
     app = Flask(__name__)
 
-    # Register the pages blueprint
-    app.register_blueprint(pages.bp)
+    app.config["SECRET_KEY"] = "dev"
+    app.config["WTF_CSRF_ENABLED"] = False
 
-    # Return the app
+    from app.pages import bp
+    app.register_blueprint(bp)
+
     return app

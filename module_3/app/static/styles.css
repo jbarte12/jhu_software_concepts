@@ -116,8 +116,9 @@ a:hover {
   }
 }
 
-/* Button styling to match nav */
-.btn-refresh {
+/* Button styling (shared)   */
+.btn-refresh,
+.btn-update {
   background-color: #749da1;
   color: #F5F7F8;
   border: none;
@@ -125,9 +126,36 @@ a:hover {
   border-radius: 5px;
   font-weight: 600;
   cursor: pointer;
+  margin-top: 10px;
+  margin-right: 10px;
 }
 
-/* slightly darker hover */
-.btn-refresh:hover {
-  background-color: #5f8d92;   /* slightly darker hover */
+/* Hover state */
+.btn-refresh:hover,
+.btn-update:hover {
+  background-color: #5f8d92;
+}
+
+/* Disabled button state */
+button:disabled {
+  background-color: #c3d6d9;
+  color: #ffffff;
+  cursor: not-allowed;
+}
+
+/* Status / message text     */
+.status-message {
+  margin-top: 15px;
+  padding: 10px 15px;
+  border-radius: 6px;
+  background: #eef5f6;
+  color: #3a5f68;
+  font-weight: 600;
+}
+
+/* Updating message emphasis */
+.updating-message {
+  margin-top: 10px;
+  font-style: italic;
+  color: #5f8d92;
 }
