@@ -1,7 +1,9 @@
+# pages.py
+
 from flask import Blueprint, render_template, redirect, url_for
 from query_data import get_application_stats
 from refresh_gradcafe import refresh
-from update_data import update_data
+from load_data import sync_db_from_llm_file
 import threading
 import json
 
@@ -14,6 +16,7 @@ def read_state():
             return json.load(f)
     except FileNotFoundError:
         return {"pulling_data": False, "pull_complete": False}
+
 
 def write_state(pulling_data, pull_complete):
     with open(STATE_FILE, "w", encoding="utf-8") as f:
@@ -44,21 +47,18 @@ def grad_cafe():
 def refresh_gradcafe():
     state = read_state()
 
-    # Prevent duplicate refresh jobs
     if state["pulling_data"]:
         return redirect(url_for("pages.grad_cafe"))
 
-    # Start pull
     write_state(True, False)
 
     def background_job():
         try:
-            refresh()
+            refresh()  # scrape + LLM + append (UNCHANGED)
         finally:
             write_state(False, True)
 
     threading.Thread(target=background_job, daemon=True).start()
-
     return redirect(url_for("pages.grad_cafe"))
 
 
@@ -76,23 +76,18 @@ def update_analysis():
             pull_complete=False
         )
 
-    refresh_result = refresh()
-
-    if refresh_result["new"] > 0:
-        update_data("new_applicant_data.json")
-        message = f"Analysis updated with {refresh_result['new']} new records."
-    else:
-        message = "No new records found to analyze."
+    # 🔑 Pull any new LLM rows into DB
+    sync_db_from_llm_file()
 
     stats = get_application_stats()
 
-    # Reset state after analysis
+    # reset completion flag so UI is clean
     write_state(False, False)
 
     return render_template(
         "gradcafe_stats.html",
         stats=stats,
-        message=message,
+        message="Analysis updated from LLM data.",
         pulling_data=False,
         pull_complete=False
     )

@@ -1,18 +1,16 @@
 {% extends 'base.html' %}
 
-<!-- ============================
-     Page header
-     ============================ -->
 {% block header %}
 <h2>GradCafe Application Statistics</h2>
 {% endblock header %}
 
-<!-- ============================
-     Main content
-     ============================ -->
 {% block content %}
 
-<!-- -------- Core statistics -------- -->
+{% if pulling_data %}
+  <!-- Auto-refresh while pulling -->
+  <meta http-equiv="refresh" content="5">
+{% endif %}
+
 <p><strong>Fall 2026 Applicants:</strong> <em>{{ stats.fall_2026_count }}</em></p>
 <p><strong>International Applicants (%):</strong> <em>{{ stats.international_pct }}%</em></p>
 <p><strong>Average GPA:</strong> <em>{{ stats.avg_gpa }}</em></p>
@@ -29,7 +27,6 @@
 
 <p><strong>JHU CS Master’s Applicants:</strong> <em>{{ stats.jhu_cs_masters }}</em></p>
 
-<!-- -------- PhD CS acceptances -------- -->
 <p>
   <strong>Fall 2026 PhD CS Acceptances (Raw):</strong>
   <em>{{ stats.fall_2026_cs_accept }}</em>
@@ -40,24 +37,18 @@
   <em>{{ stats.fall_2026_cs_accept_llm }}</em>
 </p>
 
-<!-- -------- Status / feedback messages -------- -->
 {% if message %}
   <p class="status-message">{{ message }}</p>
 {% endif %}
 
-<!-- -------- Pull state messaging -------- -->
 {% if pulling_data %}
-  <!-- Shown while background refresh thread is running -->
   <p class="updating-message">Data is being pulled… please wait.</p>
-
 {% elif pull_complete %}
-  <!-- Shown once background refresh finishes -->
   <p class="success-message">
     Pull complete. You may now update analysis.
   </p>
 {% endif %}
 
-<!-- -------- Pull data button -------- -->
 <form action="{{ url_for('pages.refresh_gradcafe') }}" method="post">
   <button
     class="btn-refresh"
@@ -68,13 +59,11 @@
   </button>
 </form>
 
-<!-- -------- Update analysis button -------- -->
 <form action="{{ url_for('pages.update_analysis') }}" method="post">
   <button
     class="btn-update"
     type="submit"
-    <!-- Disabled until pull completes AND while pulling -->
-    {% if pulling_data or not pull_complete %}disabled{% endif %}
+    {% if pulling_data %}disabled{% endif %}
   >
     Update Analysis
   </button>
