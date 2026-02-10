@@ -159,3 +159,35 @@ button:disabled {
   font-style: italic;
   color: #5f8d92;
 }
+
+/* Shared button status messaging */
+.button-status {
+  margin-top: 12px;
+  padding: 10px 15px;
+  border-radius: 6px;
+  background: #eef5f6;
+  color: #3a5f68;
+  font-weight: 600;
+  font-size: 14px;
+  font-style: italic;
+}
+
+.button-status.success {
+  background: #e8f3ef;
+}
+
+.button-status.warning {
+  background: #f3f0e8;
+}
+
+.button-status.info {
+  background: #eef5f6;
+}
+
+/* Small italic text under buttons */
+.button-description {
+  margin-top: 4px;
+  font-size: 12px;
+  font-style: italic;
+  color: black;
+}

@@ -6,28 +6,66 @@
 
 {% block content %}
 
+<!-- Auto-refresh page while data is pulling -->
 {% if pulling_data %}
-  <!-- Auto-refresh while pulling -->
   <meta http-equiv="refresh" content="5">
 {% endif %}
 
-<p><strong>Fall 2026 Applicants:</strong> <em>{{ stats.fall_2026_count }}</em></p>
-<p><strong>International Applicants (%):</strong> <em>{{ stats.international_pct }}%</em></p>
-<p><strong>Average GPA:</strong> <em>{{ stats.avg_gpa }}</em></p>
-<p><strong>Average GRE:</strong> <em>{{ stats.avg_gre }}</em></p>
-<p><strong>Average GRE Verbal:</strong> <em>{{ stats.avg_gre_v }}</em></p>
-<p><strong>Average GRE AW:</strong> <em>{{ stats.avg_gre_aw }}</em></p>
-<p><strong>Average GPA (US, Fall 2026):</strong> <em>{{ stats.avg_gpa_us_fall_2026 }}</em></p>
-<p><strong>Fall 2025 Acceptance Rate (%):</strong> <em>{{ stats.fall_2025_accept_pct }}%</em></p>
-<p><strong>Total Applicants in Pipeline:</strong><em>{{ stats.total_applicants
-    }}</em>
+<!-- Stats -->
+<p>
+  <strong>Fall 2026 Applicants:</strong>
+  <em>{{ stats.fall_2026_count }}</em>
 </p>
+
+<p>
+  <strong>International Applicants (%):</strong>
+  <em>{{ stats.international_pct }}%</em>
+</p>
+
+<p>
+  <strong>Average GPA:</strong>
+  <em>{{ stats.avg_gpa }}</em>
+</p>
+
+<p>
+  <strong>Average GRE:</strong>
+  <em>{{ stats.avg_gre }}</em>
+</p>
+
+<p>
+  <strong>Average GRE Verbal:</strong>
+  <em>{{ stats.avg_gre_v }}</em>
+</p>
+
+<p>
+  <strong>Average GRE AW:</strong>
+  <em>{{ stats.avg_gre_aw }}</em>
+</p>
+
+<p>
+  <strong>Average GPA (US, Fall 2026):</strong>
+  <em>{{ stats.avg_gpa_us_fall_2026 }}</em>
+</p>
+
+<p>
+  <strong>Fall 2025 Acceptance Rate (%):</strong>
+  <em>{{ stats.fall_2025_accept_pct }}%</em>
+</p>
+
+<p>
+  <strong>Total Applicants in Pipeline:</strong>
+  <em>{{ stats.total_applicants }}</em>
+</p>
+
 <p>
   <strong>Average GPA of Accepted Fall 2026 Applicants:</strong>
   <em>{{ stats.avg_gpa_fall_2026_accept }}</em>
 </p>
 
-<p><strong>JHU CS Master’s Applicants:</strong> <em>{{ stats.jhu_cs_masters }}</em></p>
+<p>
+  <strong>JHU CS Master’s Applicants:</strong>
+  <em>{{ stats.jhu_cs_masters }}</em>
+</p>
 
 <p>
   <strong>Fall 2026 PhD CS Acceptances (Raw):</strong>
@@ -39,18 +77,32 @@
   <em>{{ stats.fall_2026_cs_accept_llm }}</em>
 </p>
 
-{% if message %}
-  <p class="status-message">{{ message }}</p>
-{% endif %}
+<p>
+  <strong>Fall 2026 Rejected Applicants Reporting GPA (%):</strong>
+  <em>{{ stats.rejected_fall_2026_gpa_pct }}%</em>
+</p>
 
+<p>
+  <strong>Fall 2026 Accepted Applicants Reporting GPA (%):</strong>
+  <em>{{ stats.accepted_fall_2026_gpa_pct }}%</em>
+</p>
+
+<!-- Status messages -->
 {% if pulling_data %}
-  <p class="updating-message">Data is being pulled… please wait.</p>
+  <p class="button-status info">
+    Data is being pulled… please wait.
+  </p>
 {% elif pull_complete %}
-  <p class="success-message">
+  <p class="button-status success">
     Pull complete. You may now update analysis.
+  </p>
+{% elif message %}
+  <p class="button-status success">
+    {{ message }}
   </p>
 {% endif %}
 
+<!-- Pull data button -->
 <form action="{{ url_for('pages.refresh_gradcafe') }}" method="post">
   <button
     class="btn-refresh"
@@ -59,8 +111,12 @@
   >
     Pull Data
   </button>
+  <div class="button-description">
+    <em>* Pull new data from GradCafe</em>
+  </div>
 </form>
 
+<!-- Update analysis button -->
 <form action="{{ url_for('pages.update_analysis') }}" method="post">
   <button
     class="btn-update"
@@ -69,6 +125,9 @@
   >
     Update Analysis
   </button>
+  <div class="button-description">
+    <em>* Update webpage with new data</em>
+  </div>
 </form>
 
 {% endblock content %}
