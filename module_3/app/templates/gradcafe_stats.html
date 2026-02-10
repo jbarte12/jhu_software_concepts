@@ -11,45 +11,57 @@
   <meta http-equiv="refresh" content="5">
 {% endif %}
 
-<!-- Stats -->
+<!-- Statistics -->
 <p>
   <strong>Fall 2026 Applicants:</strong>
+  <!-- Integer count, no rounding or formatting -->
   <em>{{ stats.fall_2026_count }}</em>
 </p>
 
 <p>
   <strong>International Applicants (%):</strong>
-  <em>{{ stats.international_pct }}%</em>
+  <em>{{ "%.2f"|format(stats.international_pct) }}%</em>
 </p>
 
 <p>
   <strong>Average GPA:</strong>
-  <em>{{ stats.avg_gpa }}</em>
+  <em>
+    {{ "%.2f"|format(stats.avg_gpa) if stats.avg_gpa is not none else "N/A" }}
+  </em>
 </p>
 
 <p>
   <strong>Average GRE:</strong>
-  <em>{{ stats.avg_gre }}</em>
+  <em>
+    {{ "%.2f"|format(stats.avg_gre) if stats.avg_gre is not none else "N/A" }}
+  </em>
 </p>
 
 <p>
   <strong>Average GRE Verbal:</strong>
-  <em>{{ stats.avg_gre_v }}</em>
+  <em>
+    {{ "%.2f"|format(stats.avg_gre_v) if stats.avg_gre_v is not none else "N/A" }}
+  </em>
 </p>
 
 <p>
   <strong>Average GRE AW:</strong>
-  <em>{{ stats.avg_gre_aw }}</em>
+  <em>
+    {{ "%.2f"|format(stats.avg_gre_aw) if stats.avg_gre_aw is not none else "N/A" }}
+  </em>
 </p>
 
 <p>
   <strong>Average GPA (US, Fall 2026):</strong>
-  <em>{{ stats.avg_gpa_us_fall_2026 }}</em>
+  <em>
+    {{ "%.2f"|format(stats.avg_gpa_us_fall_2026)
+       if stats.avg_gpa_us_fall_2026 is not none else "N/A" }}
+  </em>
 </p>
 
 <p>
   <strong>Fall 2025 Acceptance Rate (%):</strong>
-  <em>{{ stats.fall_2025_accept_pct }}%</em>
+  <em>{{ "%.2f"|format(stats.fall_2025_accept_pct) }}%</em>
 </p>
 
 <p>
@@ -59,7 +71,10 @@
 
 <p>
   <strong>Average GPA of Accepted Fall 2026 Applicants:</strong>
-  <em>{{ stats.avg_gpa_fall_2026_accept }}</em>
+  <em>
+    {{ "%.2f"|format(stats.avg_gpa_fall_2026_accept)
+       if stats.avg_gpa_fall_2026_accept is not none else "N/A" }}
+  </em>
 </p>
 
 <p>
@@ -68,26 +83,27 @@
 </p>
 
 <p>
-  <strong>Fall 2026 PhD CS Acceptances (Raw):</strong>
+  <strong>2026 Acceptances, Georgetown, MIT, Stanford, CMU (Raw):</strong>
   <em>{{ stats.fall_2026_cs_accept }}</em>
 </p>
 
 <p>
-  <strong>Fall 2026 PhD CS Acceptances (LLM):</strong>
+  <strong>2026 Acceptances, Georgetown, MIT, Stanford, CMU (LLM):</strong>
   <em>{{ stats.fall_2026_cs_accept_llm }}</em>
 </p>
 
 <p>
   <strong>Fall 2026 Rejected Applicants Reporting GPA (%):</strong>
-  <em>{{ stats.rejected_fall_2026_gpa_pct }}%</em>
+  <em>{{ "%.2f"|format(stats.rejected_fall_2026_gpa_pct) }}%</em>
 </p>
 
 <p>
   <strong>Fall 2026 Accepted Applicants Reporting GPA (%):</strong>
-  <em>{{ stats.accepted_fall_2026_gpa_pct }}%</em>
+  <em>{{ "%.2f"|format(stats.accepted_fall_2026_gpa_pct) }}%</em>
 </p>
 
-<!-- Status messages -->
+
+<!-- Status Messages -->
 {% if pulling_data %}
   <p class="button-status info">
     Data is being pulled… please wait.
@@ -101,6 +117,7 @@
     {{ message }}
   </p>
 {% endif %}
+
 
 <!-- Pull data button -->
 <form action="{{ url_for('pages.refresh_gradcafe') }}" method="post">
