@@ -38,6 +38,14 @@ def get_application_stats():
         "5432"
     )
 
+    total_applicants = fetch_value(
+        connection,
+        """
+        SELECT COUNT(*)
+        FROM grad_applications;
+        """
+    )
+
     # Count applications for Fall 2026
     fall_2026_count = fetch_value(
         connection,
@@ -392,6 +400,8 @@ def get_application_stats():
     print(f"jhu_cs_masters: {jhu_cs_masters}")
     print(f"fall_2026_cs_accept: {fall_2026_cs_accept}")
     print(f"fall_2026_cs_accept_llm: {fall_2026_cs_accept_llm}")
+    print(f"total_applicants: {total_applicants}")
+
 
     # Close the database connection
     connection.close()
@@ -409,7 +419,8 @@ def get_application_stats():
         "avg_gpa_fall_2026_accept": avg_gpa_fall_2026_accept,
         "jhu_cs_masters": jhu_cs_masters,
         "fall_2026_cs_accept": fall_2026_cs_accept,
-        "fall_2026_cs_accept_llm": fall_2026_cs_accept_llm
+        "fall_2026_cs_accept_llm": fall_2026_cs_accept_llm,
+        "total_applicants": total_applicants
     }
 
 
