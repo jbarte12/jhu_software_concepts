@@ -163,10 +163,6 @@ def rebuild_from_llm_file(path="llm_extend_applicant_data.json"):
 
 # Incremental DB sync from LLM JSON file
 def sync_db_from_llm_file(path="llm_extend_applicant_data.json"):
-    """
-    Incrementally inserts records from llm_extend_applicant_data.json
-    that are not already in the DB.
-    """
 
     # Open a database connection
     conn = create_connection()

@@ -1,6 +1,3 @@
-# pages.py
-# This file defines the Flask routes (pages) for the GradCafe analytics app
-
 # Import Flask helpers for routing, rendering templates, and redirects
 from flask import Blueprint, render_template, redirect, url_for
 
@@ -22,26 +19,29 @@ from update_data import update_data
 # Import function that syncs LLM-processed data into the database
 from load_data import sync_db_from_llm_file
 
-
 # File used to persist pull/update state between requests
 STATE_FILE = "pull_state.json"
 
 # Create a Flask Blueprint for page routes
 bp = Blueprint("pages", __name__)
 
-
 def read_state():
+
     # Attempt to read the pull/update state from disk
     try:
         with open(STATE_FILE, "r", encoding="utf-8") as f:
+
             # Load and return the JSON contents as a dictionary
             return json.load(f)
+
     except FileNotFoundError:
+
         # If the state file doesn’t exist yet, return default values
         return {"pulling_data": False, "pull_complete": False}
 
 
 def write_state(pulling_data, pull_complete):
+
     # Write the current pull/update state to disk
     with open(STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(
@@ -54,9 +54,9 @@ def write_state(pulling_data, pull_complete):
             f,
         )
 
-
 @bp.route("/")
 def grad_cafe():
+
     # Query the database and compute all application statistics
     stats = get_application_stats()
 
@@ -72,12 +72,10 @@ def grad_cafe():
         pull_complete=state["pull_complete"],
     )
 
-
-# --------------------------------------------------
 # PULL BUTTON
-# --------------------------------------------------
 @bp.route("/refresh", methods=["POST"])
 def refresh_gradcafe():
+
     # Read the current pull/update state
     state = read_state()
 
@@ -103,10 +101,7 @@ def refresh_gradcafe():
     # Redirect back to the main page immediately
     return redirect(url_for("pages.grad_cafe"))
 
-
-# --------------------------------------------------
 # UPDATE ANALYSIS BUTTON
-# --------------------------------------------------
 @bp.route("/update-analysis", methods=["POST"])
 def update_analysis():
     # Read the current pull/update state
@@ -123,10 +118,10 @@ def update_analysis():
             pull_complete=False,
         )
 
-    # 🔑 Run LLM processing on new_applicant_data.json and append results
+    # Run LLM processing on new_applicant_data.json and append results
     processed = update_data()
 
-    # 🔑 Sync newly appended LLM-generated rows into the database
+    # Sync newly appended LLM-generated rows into the database
     sync_db_from_llm_file()
 
     # Recompute statistics after database update

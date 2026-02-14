@@ -7,18 +7,23 @@ from scrape.llm_hosting.app import _call_llm
 
 # Define a function to process newly scraped applicant data with the LLM
 def update_data(
-    new_data_path="new_applicant_data.json",      # Path to newly scraped, unprocessed data
-    llm_output_path="llm_extend_applicant_data.json",  # Path to the cumulative LLM-processed output file
+
+    # Path to newly scraped, unprocessed data
+    new_data_path="new_applicant_data.json",
+
+    # Path to the cumulative LLM-processed output file
+    llm_output_path="llm_extend_applicant_data.json",
 ):
 
     # Log that the update_data function has been called
-    print("🔥 update_data() CALLED")
+    print("update_data() CALLED")
 
     try:
         # Attempt to open and load the new applicant data file
         with open(new_data_path, "r", encoding="utf-8") as f:
             rows = json.load(f)
     except FileNotFoundError:
+
         # If the staging file does not exist, log and exit early
         print("No new_applicant_data.json found")
         return 0
@@ -33,8 +38,10 @@ def update_data(
 
     # Open the LLM output file in append mode so existing data is preserved
     with open(llm_output_path, "a", encoding="utf-8") as out:
+
         # Loop over each newly scraped applicant record
         for row in rows:
+
             # Combine program name and university into a single text prompt
             program_text = f"{row.get('program_name','')}, {row.get('university','')}"
 
@@ -62,7 +69,7 @@ def update_data(
     print(f"LLM analysis complete; processed {processed} records")
 
     # Log that the staging file has been cleared
-    print("🧹 new_applicant_data.json cleared")
+    print("new_applicant_data.json cleared")
 
     # Return the number of records processed
     return processed

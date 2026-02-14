@@ -1,126 +1,161 @@
 # refresh_gradcafe.py
 
-# Import regular expressions module for pattern matching
+# Import the regular expressions module for searching text patterns
 import re
+
 # Import JSON module for reading and writing JSON data
 import json
-# Import ThreadPoolExecutor for parallel execution of tasks
+
+# Import ThreadPoolExecutor to run tasks in parallel threads
 from concurrent.futures import ThreadPoolExecutor
 
-# Import scraping and cleaning utilities from the scrape module
+# Import scrape and clean utilities from the scrape module
 from scrape import scrape, clean
 
 
-# Load IDs that have already been seen from the LLM-extended applicant data file
 def get_seen_ids_from_llm_extend_file(path="llm_extend_applicant_data.json"):
-    # Initialize an empty set to store seen result IDs
+    # Initialize an empty set to store IDs that have already been processed
     seen_ids = set()
 
     try:
-        # Open the JSON file containing previously processed records
+        # Open the LLM-processed JSON lines file in read mode
         with open(path, "r", encoding="utf-8") as f:
-            # Iterate through the file line by line
+            # Read the file line by line
             for line in f:
                 try:
-                    # Parse each line as a JSON object
+                    # Try to parse the line as a JSON object
                     record = json.loads(line)
                 except json.JSONDecodeError:
-                    # Skip lines that are not valid JSON
+                    # If parsing fails, skip that line and continue
                     continue
 
-                # Extract the URL field from the record
+                # Extract the URL link from the record
                 url = record.get("url_link")
-                # Skip records without a URL
+                # If URL is missing, skip this record
                 if not url:
                     continue
 
-                # Extract the numeric result ID from the URL
+                # Find the numeric ID in the URL using regex
                 match = re.search(r"/result/(\d+)", url)
                 if match:
-                    # Add the extracted ID to the seen IDs set
+                    # Convert the found ID to integer and add to seen_ids set
                     seen_ids.add(int(match.group(1)))
     except FileNotFoundError:
-        # Handle the case where the file does not exist
+        # If the file doesn't exist, start with an empty seen_ids set
         print("llm_extend_applicant_data.json not found; starting fresh")
 
-    # Log how many previously seen IDs were loaded
+    # Print how many IDs were loaded for debugging
     print(f"Loaded {len(seen_ids)} seen IDs")
-    # Return the set of seen IDs
+    # Return the set of already-seen IDs
     return seen_ids
 
 
-# Scrape survey pages and collect records that have not been seen before
 def scrape_new_records(seen_ids):
-    # Initialize a list to store newly discovered records
+    # Initialize a list to collect new records
     new_records = []
+
     # Start scraping from the first survey page
     page = 1
-    # Track how many seen records appear consecutively
+
+    # Counter for consecutive already-seen records
     consecutive_seen = 0
-    # Stop scraping after encountering this many seen records in a row
+
+    # Stop scraping if this many seen records are found in a row
     SEEN_LIMIT = 3
 
-    # Continue scraping until a stopping condition is reached
+    # Loop until no more pages or stop condition is met
     while True:
-        # Log which survey page is being scraped
+        # Log current page being scraped
         print(f"Scraping survey page {page}")
 
-        # Fetch the raw HTML for the current survey page
+        # Download the HTML for the current survey page
         html = scrape._fetch_html(scrape.SURVEY_URL.format(page))
-        # Parse the HTML into structured survey results
+
+        # Parse the HTML into a list of records
         page_results = scrape._parse_survey_page(html)
 
-        # Stop if no results are returned for the page
+        # If no results are found on the page, stop scraping
         if not page_results:
             break
 
-        # Iterate through each record on the page
+        # Loop through each record on the page
         for record in page_results:
-            # Convert the record ID to an integer
+            # Convert the result ID from string to integer
             result_id = int(record["result_id"])
 
-            # Check if this record has already been seen
+            # If ID already seen, increase the consecutive counter
             if result_id in seen_ids:
-                # Increment the consecutive seen counter
                 consecutive_seen += 1
             else:
-                # Reset the counter when a new record is found
+                # If not seen, reset counter and add record to new_records
                 consecutive_seen = 0
-                # Add the new record to the results list
                 new_records.append(record)
 
-            # Stop scraping once the seen limit is reached
+            # If we reach the consecutive seen limit, stop scraping
             if consecutive_seen >= SEEN_LIMIT:
                 return new_records
 
-        # Move on to the next survey page
+        # Move to the next survey page
         page += 1
 
-    # Return all newly discovered records
+    # Return all newly found records
     return new_records
 
 
-# Enrich basic survey records with detailed application data
 def enrich_with_details(records):
     # Log how many records will be enriched
     print(f"Enriching {len(records)} records")
 
-    # Create a thread pool to scrape detail pages concurrently
+    # Use a thread pool to scrape details concurrently
     with ThreadPoolExecutor(max_workers=10) as executor:
-        # Fetch detailed data for each record in parallel
+
+        # Map each record ID to the detail scraping function
         details = executor.map(
             scrape._scrape_detail_page,
             [r["result_id"] for r in records],
         )
 
-    # Merge each detailed record into its corresponding base record
+    # Combine each detail result into its original record
     for record, detail in zip(records, details):
         record.update(detail)
 
-    # Return the enriched records
+    # Return enriched records
     return records
 
 
-# Write newly scraped and cleaned applicant data to a JSON file
 def write_new_applicant_file(records):
-    # Clean and norma
+    # Clean and normalize the data using clean module
+    cleaned = clean.clean_data(records)
+
+    # Write the cleaned data to a JSON file (overwrites previous content)
+    with open("new_applicant_data.json", "w", encoding="utf-8") as f:
+        json.dump(cleaned, f, ensure_ascii=False, indent=2)
+
+    # Log how many records were written
+    print(f"Wrote {len(cleaned)} records to new_applicant_data.json")
+
+
+def refresh():
+    # Log that refresh process has started
+    print("Starting GradCafe refresh")
+
+    # Load IDs that have already been processed
+    seen_ids = get_seen_ids_from_llm_extend_file()
+
+    # Scrape new records excluding already seen ones
+    new_records = scrape_new_records(seen_ids)
+
+    # If no new records found, stop and return zero
+    if not new_records:
+        print("No new records found")
+        return {"new": 0}
+
+    # Enrich the new records with detail page data
+    enriched = enrich_with_details(new_records)
+
+    # Write enriched data to staging file
+    write_new_applicant_file(enriched)
+
+    # Log completion and return number of new records
+    print(f"Refresh complete; added {len(enriched)} records")
+    return {"new": len(enriched)}
