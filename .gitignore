@@ -3,3 +3,9 @@ __pycache__/
 .venv/
 *.gguf
 .idea/
+
+# Ignore Huggingface caches in all modules
+*/models/.cache/
+
+# Ignore LLM binaries
+*.gguf
