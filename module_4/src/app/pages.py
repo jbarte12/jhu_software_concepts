@@ -20,7 +20,7 @@ from update_data import update_data
 from load_data import sync_db_from_llm_file
 
 # File used to persist pull/update state between requests
-STATE_FILE = "pull_state.json"
+STATE_FILE = "src/pull_state.json"
 
 # Create a Flask Blueprint for page routes
 bp = Blueprint("pages", __name__)
@@ -122,7 +122,7 @@ def update_analysis():
     processed = update_data()
 
     # Sync newly appended LLM-generated rows into the database
-    sync_db_from_llm_file()
+    sync_db_from_llm_file(path="src/llm_extend_applicant_data.json")
 
     # Recompute statistics after database update
     stats = get_application_stats()
