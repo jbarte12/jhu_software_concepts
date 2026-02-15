@@ -1,0 +1,41 @@
+<!-- Create base file that templates can pull from -->
+<!DOCTYPE html>
+
+<!-- Denote language as English -->
+<html lang="en">
+
+<!-- Define page information  -->
+<head>
+
+    <!-- Use <meta> to allow for special characters -->
+    <meta charset="UTF-8">
+
+    <!-- Title block - formatted to allow for child override -->
+    <title>{% block title %}{% endblock title %}</title>
+
+    <!-- Add the styling sheet  -->
+    <link rel = "stylesheet" href = "{{url_for('static', filename =
+    'styles.css')}}">
+</head>
+
+<!-- Define visible content information  -->
+<body>
+
+<!-- Define the nav bar in base - appears on every page, class for style -->
+<div class = "top-bar">
+
+    <!-- Pull information from the _navigation.html file -->
+    {% include("_navigation.html")%}
+</div>
+
+<!-- Define page content-->
+<section>
+
+    <!-- Page header - formatted to allow for override -->
+    <header> {% block header %}{% endblock header %}</header>
+
+    <!-- Page content - formatted to allow for override -->
+    <main>{% block content %} <p> </p>{% endblock content %}</main>
+</section>
+</body>
+</html>

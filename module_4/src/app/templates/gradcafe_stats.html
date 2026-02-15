@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h2>GradCafe Application Statistics</h2>
+{% endblock header %}
+
+{% block content %}
+
+<!-- Auto-refresh page while data is pulling -->
+{% if pulling_data %}
+  <meta http-equiv="refresh" content="5">
+{% endif %}
+
+<!-- Statistics -->
+<p>
+  <strong>Fall 2026 Applicants:</strong>
+  <!-- Integer count, no rounding or formatting -->
+  <em>{{ stats.fall_2026_count }}</em>
+</p>
+
+<p>
+  <strong>International Applicants (%):</strong>
+  <em>{{ "%.2f"|format(stats.international_pct) }}%</em>
+</p>
+
+<p>
+  <strong>Average GPA:</strong>
+  <em>
+    {{ "%.2f"|format(stats.avg_gpa) if stats.avg_gpa is not none else "N/A" }}
+  </em>
+</p>
+
+<p>
+  <strong>Average GRE:</strong>
+  <em>
+    {{ "%.2f"|format(stats.avg_gre) if stats.avg_gre is not none else "N/A" }}
+  </em>
+</p>
+
+<p>
+  <strong>Average GRE Verbal:</strong>
+  <em>
+    {{ "%.2f"|format(stats.avg_gre_v) if stats.avg_gre_v is not none else "N/A" }}
+  </em>
+</p>
+
+<p>
+  <strong>Average GRE AW:</strong>
+  <em>
+    {{ "%.2f"|format(stats.avg_gre_aw) if stats.avg_gre_aw is not none else "N/A" }}
+  </em>
+</p>
+
+<p>
+  <strong>Average GPA (US, Fall 2026):</strong>
+  <em>
+    {{ "%.2f"|format(stats.avg_gpa_us_fall_2026)
+       if stats.avg_gpa_us_fall_2026 is not none else "N/A" }}
+  </em>
+</p>
+
+<p>
+  <strong>Fall 2025 Acceptance Rate (%):</strong>
+  <em>{{ "%.2f"|format(stats.fall_2025_accept_pct) }}%</em>
+</p>
+
+<p>
+  <strong>Total Applicants in Pipeline:</strong>
+  <em>{{ stats.total_applicants }}</em>
+</p>
+
+<p>
+  <strong>Average GPA of Accepted Fall 2025 Applicants:</strong>
+  <em>
+    {{ "%.2f"|format(stats.avg_gpa_fall_2025_accept)
+       if stats.avg_gpa_fall_2025_accept is not none else "N/A" }}
+  </em>
+</p>
+
+<p>
+  <strong>JHU CS Master’s Applicants:</strong>
+  <em>{{ stats.jhu_cs_masters }}</em>
+</p>
+
+<p>
+  <strong>2026 Acceptances, Georgetown, MIT, Stanford, CMU (Raw):</strong>
+  <em>{{ stats.fall_2026_cs_accept }}</em>
+</p>
+
+<p>
+  <strong>2026 Acceptances, Georgetown, MIT, Stanford, CMU (LLM):</strong>
+  <em>{{ stats.fall_2026_cs_accept_llm }}</em>
+</p>
+
+<p>
+  <strong>Fall 2026 Rejected Applicants Reporting GPA (%):</strong>
+  <em>{{ "%.2f"|format(stats.rejected_fall_2026_gpa_pct) }}%</em>
+</p>
+
+<p>
+  <strong>Fall 2026 Accepted Applicants Reporting GPA (%):</strong>
+  <em>{{ "%.2f"|format(stats.accepted_fall_2026_gpa_pct) }}%</em>
+</p>
+
+
+<!-- Status Messages -->
+{% if pulling_data %}
+  <p class="button-status info">
+    Data is being pulled… please wait.
+  </p>
+{% elif pull_complete %}
+  <p class="button-status success">
+    Pull complete. You may now update analysis.
+  </p>
+{% elif message %}
+  <p class="button-status success">
+    {{ message }}
+  </p>
+{% endif %}
+
+
+<!-- Pull data button -->
+<form action="{{ url_for('pages.refresh_gradcafe') }}" method="post">
+  <button
+    class="btn-refresh"
+    type="submit"
+    {% if pulling_data %}disabled{% endif %}
+  >
+    Pull Data
+  </button>
+  <div class="button-description">
+    <em>* Pull new data from GradCafe</em>
+  </div>
+</form>
+
+<!-- Update analysis button -->
+<form action="{{ url_for('pages.update_analysis') }}" method="post">
+  <button
+    class="btn-update"
+    type="submit"
+    {% if pulling_data %}disabled{% endif %}
+  >
+    Update Analysis
+  </button>
+  <div class="button-description">
+    <em>* Update webpage with new data</em>
+  </div>
+</form>
+
+{% endblock content %}
