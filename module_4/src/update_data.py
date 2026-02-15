@@ -2,7 +2,7 @@
 import json
 
 # Import the internal function used to call the LLM for standardization
-from scrape.llm_hosting.app import _call_llm
+from src.scrape.llm_hosting.app import _call_llm
 
 
 # Define a function to process newly scraped applicant data with the LLM

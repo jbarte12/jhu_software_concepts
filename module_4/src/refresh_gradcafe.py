@@ -10,7 +10,7 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 
 # Import scrape and clean utilities from the scrape module
-from scrape import clean, scrape
+from src.scrape import clean, scrape
 
 
 def get_seen_ids_from_llm_extend_file(

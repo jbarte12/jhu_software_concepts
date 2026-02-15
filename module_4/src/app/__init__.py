@@ -3,7 +3,7 @@ from flask import Flask
 
 # Import the pages module so Flask knows about the blueprint package
 # (app = main Flask application, pages = blueprint containing routes)
-from app import pages
+from . import pages
 
 # Application factory function
 # This is the standard Flask pattern for creating an app instance
@@ -18,7 +18,7 @@ def create_app():
     app.config["WTF_CSRF_ENABLED"] = False
 
     # Import the Blueprint object that defines page routes
-    from app.pages import bp
+    from .pages import bp
 
     # Register the pages blueprint with the Flask app
     app.register_blueprint(bp)

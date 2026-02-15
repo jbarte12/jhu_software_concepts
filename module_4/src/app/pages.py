@@ -19,8 +19,11 @@ from update_data import update_data
 # Import function that syncs LLM-processed data into the database
 from load_data import sync_db_from_llm_file
 
+import os
+
 # File used to persist pull/update state between requests
-STATE_FILE = "src/pull_state.json"
+STATE_FILE = os.path.join(os.path.dirname(__file__), "..", "pull_state.json")
+
 
 # Create a Flask Blueprint for page routes
 bp = Blueprint("pages", __name__)
@@ -55,6 +58,11 @@ def write_state(pulling_data, pull_complete):
         )
 
 @bp.route("/")
+def home_redirect():
+    """Redirect root URL to /analysis."""
+    return redirect(url_for("pages.grad_cafe"))
+
+@bp.route("/analysis")
 def grad_cafe():
 
     # Query the database and compute all application statistics
@@ -122,7 +130,7 @@ def update_analysis():
     processed = update_data()
 
     # Sync newly appended LLM-generated rows into the database
-    sync_db_from_llm_file(path="src/llm_extend_applicant_data.json")
+    sync_db_from_llm_file(path=os.path.join(os.path.dirname(__file__), "..", "llm_extend_applicant_data.json"))
 
     # Recompute statistics after database update
     stats = get_application_stats()

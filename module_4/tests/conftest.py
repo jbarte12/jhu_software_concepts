@@ -1,6 +1,12 @@
 # tests/conftest.py
 
-import pytest
+import sys
+from pathlib import Path
+
+# Add src folder to the top of Python path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
+
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "web: Flask route/page tests")
