@@ -2,17 +2,18 @@
 import json
 
 # Import the internal function used to call the LLM for standardization
-from src.scrape.llm_hosting.app import _call_llm
+from .scrape.llm_hosting.app import _call_llm
 
+from .paths import NEW_APPLICANT_FILE, LLM_OUTPUT_FILE
 
 # Define a function to process newly scraped applicant data with the LLM
 def update_data(
 
     # Path to newly scraped, unprocessed data
-    new_data_path="src/new_applicant_data.json",
+    new_data_path= NEW_APPLICANT_FILE,
 
     # Path to the cumulative LLM-processed output file
-    llm_output_path="src/llm_extend_applicant_data.json",
+    llm_output_path=LLM_OUTPUT_FILE,
 ):
 
     # Log that the update_data function has been called

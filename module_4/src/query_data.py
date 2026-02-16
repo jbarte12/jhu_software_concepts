@@ -1,5 +1,5 @@
 # Import the database connection helper function from load_data.py
-from src.load_data import create_connection
+from .load_data import create_connection
 
 
 # Helper function that runs a SQL query and returns a single scalar value

@@ -12,13 +12,10 @@ from psycopg2.extras import execute_values
 # Used to convert string dates into Python date objects
 from datetime import datetime
 
+from .paths import LLM_OUTPUT_FILE
+
 # Used to load JSON lines from scraped / LLM files
 import json
-
-from pathlib import Path
-
-BASE_DIR = Path(__file__).parent.resolve()
-DEFAULT_JSON_PATH = BASE_DIR / "llm_extend_applicant_data.json"
 
 # Create and return a database connection
 def create_connection(
@@ -54,7 +51,7 @@ def execute_query(connection, query):
     cursor.execute(query)
 
 # FULL rebuild of the database from LLM JSON file
-def rebuild_from_llm_file(path=DEFAULT_JSON_PATH):
+def rebuild_from_llm_file(path=LLM_OUTPUT_FILE):
 
     # Open a database connection
     conn = create_connection()
@@ -167,7 +164,7 @@ def rebuild_from_llm_file(path=DEFAULT_JSON_PATH):
     conn.close()
 
 # Incremental DB sync from LLM JSON file
-def sync_db_from_llm_file(path=DEFAULT_JSON_PATH):
+def sync_db_from_llm_file(path=LLM_OUTPUT_FILE):
 
     # Open a database connection
     conn = create_connection()

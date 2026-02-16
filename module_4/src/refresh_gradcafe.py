@@ -10,11 +10,11 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 
 # Import scrape and clean utilities from the scrape module
-from src.scrape import clean, scrape
+from .scrape import scrape, clean
+from .paths import NEW_APPLICANT_FILE, LLM_OUTPUT_FILE
 
 
-def get_seen_ids_from_llm_extend_file(
-        path="src/llm_extend_applicant_data.json"):
+def get_seen_ids_from_llm_extend_file(path=LLM_OUTPUT_FILE):
     # Initialize an empty set to store IDs that have already been processed
     seen_ids = set()
 
@@ -129,7 +129,7 @@ def write_new_applicant_file(records):
     cleaned = clean.clean_data(records)
 
     # Write the cleaned data to a JSON file (overwrites previous content)
-    with open("src/new_applicant_data.json", "w", encoding="utf-8") as f:
+    with open(NEW_APPLICANT_FILE, "w", encoding="utf-8") as f:
         json.dump(cleaned, f, ensure_ascii=False, indent=2)
 
     # Log how many records were written
