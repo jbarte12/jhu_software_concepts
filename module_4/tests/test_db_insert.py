@@ -1,10 +1,101 @@
 import json
 from datetime import date
 import pytest
-import src.load_data  # needed for Option 1 patching
+import src.scrape.scrape as scrape
 
-# Import the function to test
+import src.load_data  # needed for Option 1 patching
+from src.scrape.scrape import _parse_survey_page, _scrape_detail_page, _fetch_html
+
+from bs4 import BeautifulSoup
 from src.load_data import rebuild_from_llm_file
+
+# ------------------------
+# Scraper Smoke Test (Survey Page)
+# ------------------------
+@pytest.mark.db
+def test_scraper_survey_page(monkeypatch):
+    # Survey page HTML (summary)
+    fake_survey_html = """
+    <table>
+      <tr>
+        <td>TestU</td>
+        <td>CS</td>
+        <td>January 1, 2026</td>
+        <td>Accepted</td>
+        <td><a href="/result/123">Detail</a></td>
+      </tr>
+      <tr>
+        <td colspan="5"><div>Fall 2026</div><div>US</div></td>
+      </tr>
+    </table>
+    """
+
+    # Monkeypatch _fetch_html to return survey HTML
+    monkeypatch.setattr("src.scrape.scrape._fetch_html", lambda url, retries=3: fake_survey_html)
+
+    results = _parse_survey_page(fake_survey_html)
+    assert len(results) == 1
+    r = results[0]
+    assert r["university"] == "TestU"
+    assert r["program_name"] == "CS"
+    assert r["applicant_status"] == "Accepted"
+    assert r["start_term"] == "Fall 2026"
+    assert r["International/US"] == "US"
+    assert r["result_id"] == "123"
+    assert r["url_link"] == "https://www.thegradcafe.com/result/123"
+
+
+# ------------------------
+# Scraper Detail Page Test
+# ------------------------
+@pytest.mark.db
+def test_scraper_detail_page(monkeypatch):
+    # Detail page HTML
+    fake_detail_html = """
+    <main>
+      <dl class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2">
+        <div class="tw-border-t tw-border-gray-100 tw-py-6 sm:tw-col-span-1">
+          <dt>Program</dt>
+          <dd>CS</dd>
+        </div>
+        <div class="tw-border-t tw-border-gray-100 tw-py-6 sm:tw-col-span-1">
+          <dt>Degree Type</dt>
+          <dd>Masters</dd>
+        </div>
+        <div class="tw-border-t tw-border-gray-100 tw-py-6 sm:tw-col-span-1">
+          <dt>Notes</dt>
+          <dd>Great fit</dd>
+        </div>
+        <div class="tw-border-t tw-border-gray-100 tw-py-6 sm:tw-col-span-1">
+          <dt>Undergrad GPA</dt>
+          <dd>3.9</dd>
+        </div>
+      </dl>
+      <ul>
+        <li><span>GRE General:</span><span>330</span></li>
+        <li><span>GRE Verbal:</span><span>165</span></li>
+        <li><span>Analytical Writing:</span><span>5</span></li>
+      </ul>
+    </main>
+    """
+
+    # Monkeypatch _fetch_html to return detail HTML
+    monkeypatch.setattr("src.scrape.scrape._fetch_html", lambda url, retries=3: fake_detail_html)
+
+    # Call the detail scraper
+    result = _scrape_detail_page("123")
+    assert result["program_name"] == "CS"
+    assert result["degree_type"] == "Masters"
+    assert result["comments"] == "Great fit"
+    assert result["gpa"] == "3.9"
+    assert result["gre_general"] == "330"
+    assert result["gre_verbal"] == "165"
+    assert result["gre_analytical_writing"] == "5"
+
+
+# ------------------------
+# Existing DB Tests
+# ------------------------
 
 # --- Fake DB ---
 class FakeCursor:
@@ -197,3 +288,173 @@ def test_query_statistics():
     ]
     for key in expected_keys:
         assert key in stats
+
+
+### EXTRA TESTS #####
+# ------------------------
+# _clean_text tests (lines 43-54)
+# ------------------------
+def test_clean_text_none_and_whitespace():
+    # None element
+    assert scrape._clean_text(None) == ""
+
+    # Element with extra spaces
+    html = "<div>   Hello   World   </div>"
+    soup = BeautifulSoup(html, "html.parser")
+    div = soup.div
+    assert scrape._clean_text(div) == "Hello World"
+
+# ------------------------
+# _extract_dt_dd tests (line 62)
+# ------------------------
+def test_extract_dt_dd_missing_label():
+    html = "<dl><dt>Other</dt><dd>Value</dd></dl>"
+    soup = BeautifulSoup(html, "html.parser")
+    # Label not present
+    assert scrape._extract_dt_dd(soup, "Program") == ""
+
+# ------------------------
+# _extract_undergrad_gpa tests (lines 85,96)
+# ------------------------
+@pytest.mark.parametrize("gpa_val", ["0", "0.0", "0.00", "99.99"])
+def test_extract_undergrad_gpa_placeholder_values(gpa_val):
+    html = f"<dl><dt>Undergrad GPA</dt><dd>{gpa_val}</dd></dl>"
+    soup = BeautifulSoup(html, "html.parser")
+    assert scrape._extract_undergrad_gpa(soup) == ""
+
+def test_extract_undergrad_gpa_normal_value():
+    html = "<dl><dt>Undergrad GPA</dt><dd>3.75</dd></dl>"
+    soup = BeautifulSoup(html, "html.parser")
+    assert scrape._extract_undergrad_gpa(soup) == "3.75"
+
+# ------------------------
+# _extract_gre_scores tests (lines 127,134)
+# ------------------------
+def test_extract_gre_scores_zero_values():
+    html = """
+    <ul>
+      <li><span>GRE General:</span><span>0</span></li>
+      <li><span>GRE Verbal:</span><span>0.0</span></li>
+      <li><span>Analytical Writing:</span><span>99.99</span></li>
+    </ul>
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    scores = scrape._extract_gre_scores(soup)
+    assert scores == {"gre_general": "", "gre_verbal": "", "gre_analytical_writing": ""}
+
+def test_extract_gre_scores_normal_values():
+    html = """
+    <ul>
+      <li><span>GRE General:</span><span>330</span></li>
+      <li><span>GRE Verbal:</span><span>165</span></li>
+      <li><span>Analytical Writing:</span><span>5</span></li>
+    </ul>
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    scores = scrape._extract_gre_scores(soup)
+    assert scores == {"gre_general": "330", "gre_verbal": "165", "gre_analytical_writing": "5"}
+
+# ------------------------
+# _parse_survey_page metadata row parsing (line 205)
+# ------------------------
+def test_parse_survey_page_metadata_variations():
+    html = """
+    <table>
+      <tr>
+        <td>TestU</td><td>CS</td><td>Jan 1, 2026</td><td>Accepted</td>
+        <td><a href="/result/1">Detail</a></td>
+      </tr>
+      <tr>
+        <td colspan="5">
+          <div>Fall 2026</div>
+          <div>u.s.</div>
+          <div>ignore me</div>
+        </td>
+      </tr>
+      <tr>
+        <td>TestU2</td><td>CS2</td><td>Jan 2, 2026</td><td>Rejected</td>
+        <td><a href="/result/2">Detail</a></td>
+      </tr>
+      <tr>
+        <td colspan="5">
+          <div>Spring 2027</div>
+          <div>International</div>
+        </td>
+      </tr>
+    </table>
+    """
+    results = scrape._parse_survey_page(html)
+    assert results[0]["start_term"] == "Fall 2026"
+    assert results[0]["International/US"] == "US"  # u.s. normalized
+    assert results[1]["start_term"] == "Spring 2027"
+    assert results[1]["International/US"] == "International"
+
+# ------------------------
+# scrape_data() lines 258–321, 328–334
+# ------------------------
+def test_scrape_data_loop_and_detail_merge(monkeypatch, tmp_path):
+
+    fake_page_html = """
+    <table>
+      <tr>
+        <td>U</td><td>P</td><td>Jan 1, 2026</td><td>Accepted</td>
+        <td><a href="/result/1">Detail</a></td>
+      </tr>
+      <tr>
+        <td colspan="5"><div>Fall 2026</div><div>US</div></td>
+      </tr>
+      <tr>
+        <td>U2</td><td>P2</td><td>Jan 2, 2026</td><td>Rejected</td>
+        <td><a href="/result/2">Detail</a></td>
+      </tr>
+      <tr>
+        <td colspan="5"><div>Spring 2027</div><div>International</div></td>
+      </tr>
+    </table>
+    """
+
+    # Patch _fetch_html
+    fetch_pages = [fake_page_html, ""]
+    monkeypatch.setattr(scrape, "_fetch_html", lambda url, retries=3: fetch_pages.pop(0))
+
+    # Patch _scrape_detail_page
+    def fake_detail(result_id):
+        return {
+            "program_name": f"Prog{result_id}",
+            "degree_type": "Masters",
+            "comments": "",
+            "gpa": "3.5",
+            "gre_general": "",
+            "gre_verbal": "",
+            "gre_analytical_writing": "",
+        }
+    monkeypatch.setattr(scrape, "_scrape_detail_page", fake_detail)
+
+    # Patch OUTPUT_FILE
+    output_file = tmp_path / "data.json"
+    scrape.OUTPUT_FILE = str(output_file)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+
+    # Patch SAVE_EVERY so JSON dump triggers for tiny dataset
+    monkeypatch.setattr(scrape, "SAVE_EVERY", 1)
+
+    # Capture json.dump calls
+    saved_data = {}
+    def fake_json_dump(data, f, **kwargs):
+        saved_data["data"] = data
+    monkeypatch.setattr(scrape.json, "dump", fake_json_dump)
+
+    # Run scrape_data
+    results = scrape.scrape_data()
+
+    # Check details merged correctly
+    assert all(r["program_name"].startswith("Prog") for r in results)
+
+    # Check metadata
+    assert results[0]["start_term"] == "Fall 2026"
+    assert results[0]["International/US"] == "US"
+    assert results[1]["start_term"] == "Spring 2027"
+    assert results[1]["International/US"] == "International"
+
+    # Check JSON "written"
+    assert saved_data["data"] == results
