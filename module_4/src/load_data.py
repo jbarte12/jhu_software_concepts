@@ -74,7 +74,7 @@ def rebuild_from_llm_file(path=LLM_OUTPUT_FILE):
           gre FLOAT,
           gre_v FLOAT,
           gre_aw FLOAT,
-          degree TEXT,
+          degree TEXT,å
           llm_generated_program TEXT,
           llm_generated_university TEXT
         );
