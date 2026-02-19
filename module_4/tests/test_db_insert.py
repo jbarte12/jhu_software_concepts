@@ -32,6 +32,7 @@ from src.query_data import get_application_stats
 # FAKE DATABASE INFRASTRUCTURE
 # ============================================================
 
+@pytest.mark.db
 class FakeCursor:
     """Fake psycopg2 cursor that records executed queries and captured rows.
 
@@ -115,7 +116,7 @@ class FakeConnection:
         """Mark the connection as closed."""
         self.closed = True
 
-
+@pytest.mark.db
 def fake_execute_values(cur, sql, rows):
     """Simulate ``psycopg2.extras.execute_values`` by appending rows to the cursor.
 
@@ -128,7 +129,7 @@ def fake_execute_values(cur, sql, rows):
     """
     cur.inserted_rows.extend(rows)
 
-
+@pytest.mark.db
 def fake_execute_values_unique(cur, sql, rows):
     """Simulate ``execute_values`` with ``ON CONFLICT (url) DO NOTHING`` semantics.
 

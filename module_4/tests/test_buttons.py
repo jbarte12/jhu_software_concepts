@@ -363,7 +363,7 @@ def test_update_analysis_busy(client):
 # STATE FILE INFRASTRUCTURE
 # ============================================================
 
-@pytest.mark.web
+@pytest.mark.buttons
 def test_read_state_file_not_found(tmp_path, monkeypatch):
     """Verify ``read_state`` returns safe defaults when the state file is missing.
 

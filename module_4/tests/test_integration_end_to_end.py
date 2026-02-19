@@ -339,6 +339,7 @@ def test_refresh_with_seen_ids(client, monkeypatch, tmp_path, instant_thread, fa
         2,
     ),
 ])
+@pytest.mark.integration
 def test_scrape_new_records_all_branches(
     monkeypatch, page_results_sequence, seen_ids, expected_new_count
 ):
@@ -388,6 +389,7 @@ def test_scrape_new_records_all_branches(
 # enrich_with_details
 # ============================================================
 
+@pytest.mark.integration
 def test_enrich_with_details_realistic(monkeypatch):
     """Verify ``enrich_with_details`` merges detail-page data into records.
 
@@ -468,7 +470,7 @@ def test_enrich_with_details_realistic(monkeypatch):
 # write_new_applicant_file
 # ============================================================
 
-@pytest.mark.clean
+@pytest.mark.integration
 def test_write_new_applicant_file(tmp_path, monkeypatch):
     """Verify ``write_new_applicant_file`` creates the output file correctly.
 
@@ -553,6 +555,7 @@ _FAKE_ROWS = [
 ]
 
 
+@pytest.mark.integration
 def test_refresh_with_new_records(monkeypatch, tmp_path):
     """Verify ``refresh()`` writes new records to disk and returns the correct count.
 
@@ -584,6 +587,7 @@ def test_refresh_with_new_records(monkeypatch, tmp_path):
     assert json.loads(out_file.read_text(encoding="utf-8")) == _FAKE_ROWS
 
 
+@pytest.mark.integration
 def test_refresh_no_new_records(monkeypatch):
     """Verify ``refresh()`` returns 0 when the scraper finds nothing new.
 
@@ -599,7 +603,7 @@ def test_refresh_no_new_records(monkeypatch):
 # update_data
 # ============================================================
 
-@pytest.mark.clean
+@pytest.mark.integration
 def test_update_analysis_hits_all_update_data_branches(monkeypatch):
     """Verify ``update_data`` processes all rows and calls the LLM once per row.
 
@@ -646,6 +650,7 @@ def test_update_analysis_hits_all_update_data_branches(monkeypatch):
     assert called["llm"] == 3
 
 
+@pytest.mark.integration
 def test_update_data_file_not_found(monkeypatch):
     """Verify ``update_data`` returns 0 when the applicant file does not exist.
 
@@ -655,6 +660,7 @@ def test_update_data_file_not_found(monkeypatch):
     assert update_data() == 0
 
 
+@pytest.mark.integration
 def test_update_data_empty_file(monkeypatch):
     """Verify ``update_data`` returns 0 when the applicant file is empty (``[]``).
 
@@ -668,6 +674,7 @@ def test_update_data_empty_file(monkeypatch):
 # sync_db_from_llm_file
 # ============================================================
 
+@pytest.mark.integration
 def test_sync_db_from_llm_file(monkeypatch):
     """Verify ``sync_db_from_llm_file`` parses NDJSON and inserts the correct row tuple.
 
@@ -790,6 +797,7 @@ def test_update_analysis_conflict_during_pull(client, monkeypatch, tmp_path):
 # END-TO-END: pull -> update -> render
 # ============================================================
 
+@pytest.mark.integration
 def test_end_to_end_pull_update_render(client, monkeypatch, tmp_path, instant_thread):
     """Full happy-path integration test: pull -> update analysis -> render page.
 
