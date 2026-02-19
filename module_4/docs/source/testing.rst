@@ -13,7 +13,7 @@ Run everything:
 
 .. code-block:: bash
 
-   pytest
+   pytest -m "web or buttons or analysis or db or integration"
 
 Run one marker group with verbose output:
 
