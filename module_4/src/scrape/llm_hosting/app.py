@@ -12,7 +12,10 @@ from typing import Any, Dict, List, Tuple
 
 from flask import Flask, jsonify, request
 from huggingface_hub import hf_hub_download
-from llama_cpp import Llama  # CPU-only by default if N_GPU_LAYERS=0
+try:
+    from llama_cpp import Llama
+except ImportError:
+    Llama = None  # CPU-only by default if N_GPU_LAYERS=0
 
 app = Flask(__name__)
 
