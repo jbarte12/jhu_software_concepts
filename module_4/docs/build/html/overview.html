@@ -1,0 +1,196 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overview &amp; Setup &mdash; Module 4 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=29a6c3e3"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Architecture" href="architecture.html" />
+    <link rel="prev" title="Module 4 — GradCafe Analysis Pipeline" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Module 4
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview &amp; Setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-this-project-does">What this project does</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#environment-setup">Environment setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-application">Running the application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-tests">Running the tests</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing Guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Module 4</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Overview &amp; Setup</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/overview.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="overview-setup">
+<h1>Overview &amp; Setup<a class="headerlink" href="#overview-setup" title="Link to this heading"></a></h1>
+<section id="what-this-project-does">
+<h2>What this project does<a class="headerlink" href="#what-this-project-does" title="Link to this heading"></a></h2>
+<p>This application scrapes graduate school application results from GradCafe,
+runs each record through a local LLM to standardize program and university
+names, stores the results in PostgreSQL, and serves live statistics through
+a Flask dashboard.</p>
+<p>The pipeline has three stages:</p>
+<ol class="arabic simple">
+<li><p><strong>Pull Data</strong> — scrapes new applicant records from GradCafe and saves
+them to a local JSON file.</p></li>
+<li><p><strong>Update Analysis</strong> — reads the JSON file, calls the LLM to normalize
+each record, and syncs the results into the database.</p></li>
+<li><p><strong>Render</strong> — queries the database and renders the stats page.</p></li>
+</ol>
+</section>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Python 3.11+</p></li>
+<li><p>PostgreSQL 15+ running locally</p></li>
+<li><p>The TinyLlama GGUF model file placed in <code class="docutils literal notranslate"><span class="pre">models/</span></code></p></li>
+</ul>
+</section>
+<section id="environment-setup">
+<h2>Environment setup<a class="headerlink" href="#environment-setup" title="Link to this heading"></a></h2>
+<p><strong>1. Clone the repo and create a virtual environment:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>&lt;your-repo-url&gt;
+<span class="nb">cd</span><span class="w"> </span>module_4
+python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate<span class="w">      </span><span class="c1"># Windows: .venv\Scripts\activate</span>
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+<p><strong>2. Set up the database:</strong></p>
+<p>The app connects to PostgreSQL using the credentials hardcoded in
+<code class="docutils literal notranslate"><span class="pre">src/load_data.py</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>host:     127.0.0.1
+port:     5432
+database: sm_app
+user:     postgres
+password: abc123
+</pre></div>
+</div>
+<p>Create the database before running:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;CREATE DATABASE sm_app;&quot;</span>
+</pre></div>
+</div>
+<p><strong>3. Place the LLM model:</strong></p>
+<p>Download <code class="docutils literal notranslate"><span class="pre">tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf</span></code> and place it at:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>module_4/models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf
+</pre></div>
+</div>
+</section>
+<section id="running-the-application">
+<h2>Running the application<a class="headerlink" href="#running-the-application" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>module_4
+python<span class="w"> </span>src/run.py
+</pre></div>
+</div>
+<p>The app will be available at <code class="docutils literal notranslate"><span class="pre">http://127.0.0.1:5000</span></code>.</p>
+</section>
+<section id="running-the-tests">
+<h2>Running the tests<a class="headerlink" href="#running-the-tests" title="Link to this heading"></a></h2>
+<p>Run all tests:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest
+</pre></div>
+</div>
+<p>Run a specific marker group:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>-m<span class="w"> </span>integration<span class="w"> </span>-v
+pytest<span class="w"> </span>-m<span class="w"> </span>db<span class="w"> </span>-v
+pytest<span class="w"> </span>-m<span class="w"> </span>analysis<span class="w"> </span>-v
+pytest<span class="w"> </span>-m<span class="w"> </span>buttons<span class="w"> </span>-v
+pytest<span class="w"> </span>-m<span class="w"> </span>web<span class="w"> </span>-v
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="testing.html"><span class="doc">Testing Guide</span></a> for the full testing guide.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Module 4 — GradCafe Analysis Pipeline" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="architecture.html" class="btn btn-neutral float-right" title="Architecture" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Jayna Bartel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

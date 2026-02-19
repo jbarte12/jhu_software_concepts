@@ -1,0 +1,1809 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Testing Guide &mdash; Module 4 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=29a6c3e3"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="API Reference" href="api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Module 4
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview &amp; Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Testing Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#running-tests">Running tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#markers">Markers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fixtures">Fixtures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tests.test_scraper_function">Test file reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tests-test-scraper-clean">tests.test_scraper_clean</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.FAKE_DETAIL_EMPTY"><code class="docutils literal notranslate"><span class="pre">FAKE_DETAIL_EMPTY</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.FAKE_DETAIL_HTML"><code class="docutils literal notranslate"><span class="pre">FAKE_DETAIL_HTML</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.FAKE_SURVEY_EMPTY"><code class="docutils literal notranslate"><span class="pre">FAKE_SURVEY_EMPTY</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.FAKE_SURVEY_HTML"><code class="docutils literal notranslate"><span class="pre">FAKE_SURVEY_HTML</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.FAKE_SURVEY_HTML_METADATA"><code class="docutils literal notranslate"><span class="pre">FAKE_SURVEY_HTML_METADATA</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.fast_sleep"><code class="docutils literal notranslate"><span class="pre">fast_sleep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_clean_text_none"><code class="docutils literal notranslate"><span class="pre">test_clean_text_none()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_empty_detail_fields"><code class="docutils literal notranslate"><span class="pre">test_empty_detail_fields()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_extract_gre_scores_continue_branch"><code class="docutils literal notranslate"><span class="pre">test_extract_gre_scores_continue_branch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_extract_undergrad_gpa_placeholder_branch"><code class="docutils literal notranslate"><span class="pre">test_extract_undergrad_gpa_placeholder_branch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_extract_undergrad_gpa_zero_values"><code class="docutils literal notranslate"><span class="pre">test_extract_undergrad_gpa_zero_values()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_fetch_html_fail"><code class="docutils literal notranslate"><span class="pre">test_fetch_html_fail()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_fetch_html_retry"><code class="docutils literal notranslate"><span class="pre">test_fetch_html_retry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_get_seen_ids_file_not_found"><code class="docutils literal notranslate"><span class="pre">test_get_seen_ids_file_not_found()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_get_seen_ids_json_decode_error"><code class="docutils literal notranslate"><span class="pre">test_get_seen_ids_json_decode_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_get_seen_ids_no_url"><code class="docutils literal notranslate"><span class="pre">test_get_seen_ids_no_url()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_gre_scores_missing_next_span"><code class="docutils literal notranslate"><span class="pre">test_gre_scores_missing_next_span()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_gre_scores_skip_non_label_span"><code class="docutils literal notranslate"><span class="pre">test_gre_scores_skip_non_label_span()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_load_data_reads_json"><code class="docutils literal notranslate"><span class="pre">test_load_data_reads_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_normalize_status_branches"><code class="docutils literal notranslate"><span class="pre">test_normalize_status_branches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_parse_survey_page_metadata_assignment_with_main_result"><code class="docutils literal notranslate"><span class="pre">test_parse_survey_page_metadata_assignment_with_main_result()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_parse_survey_page_skip_no_link"><code class="docutils literal notranslate"><span class="pre">test_parse_survey_page_skip_no_link()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_save_data_with_gradcafe_format"><code class="docutils literal notranslate"><span class="pre">test_save_data_with_gradcafe_format()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_save_data_writes_file_and_prints"><code class="docutils literal notranslate"><span class="pre">test_save_data_writes_file_and_prints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_scrape_data"><code class="docutils literal notranslate"><span class="pre">test_scrape_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_scrape_detail_page"><code class="docutils literal notranslate"><span class="pre">test_scrape_detail_page()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_survey_page_break"><code class="docutils literal notranslate"><span class="pre">test_survey_page_break()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_scraper_function.test_survey_page_continue_and_metadata"><code class="docutils literal notranslate"><span class="pre">test_survey_page_continue_and_metadata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests-test-db-insert">tests.test_db_insert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_db_insert.FakeConnection"><code class="docutils literal notranslate"><span class="pre">FakeConnection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tests.test_db_insert.FakeConnection.close"><code class="docutils literal notranslate"><span class="pre">FakeConnection.close()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tests.test_db_insert.FakeConnection.commit"><code class="docutils literal notranslate"><span class="pre">FakeConnection.commit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tests.test_db_insert.FakeConnection.cursor"><code class="docutils literal notranslate"><span class="pre">FakeConnection.cursor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_db_insert.FakeCursor"><code class="docutils literal notranslate"><span class="pre">FakeCursor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tests.test_db_insert.FakeCursor.execute"><code class="docutils literal notranslate"><span class="pre">FakeCursor.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tests.test_db_insert.FakeCursor.fetchone"><code class="docutils literal notranslate"><span class="pre">FakeCursor.fetchone()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_db_insert.fake_execute_values"><code class="docutils literal notranslate"><span class="pre">fake_execute_values()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_db_insert.fake_execute_values_unique"><code class="docutils literal notranslate"><span class="pre">fake_execute_values_unique()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_db_insert.test_execute_query_records_sql"><code class="docutils literal notranslate"><span class="pre">test_execute_query_records_sql()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_db_insert.test_get_application_stats_returns_all_keys"><code class="docutils literal notranslate"><span class="pre">test_get_application_stats_returns_all_keys()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_db_insert.test_postgres_connection"><code class="docutils literal notranslate"><span class="pre">test_postgres_connection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_db_insert.test_postgres_connection_failure"><code class="docutils literal notranslate"><span class="pre">test_postgres_connection_failure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_db_insert.test_rebuild_from_llm_file_inserts_rows"><code class="docutils literal notranslate"><span class="pre">test_rebuild_from_llm_file_inserts_rows()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_db_insert.test_rebuild_from_llm_file_uniqueness"><code class="docutils literal notranslate"><span class="pre">test_rebuild_from_llm_file_uniqueness()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests-test-flask-page">tests.test_flask_page</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_flask_page.FAKE_STATE"><code class="docutils literal notranslate"><span class="pre">FAKE_STATE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_flask_page.FAKE_STATS"><code class="docutils literal notranslate"><span class="pre">FAKE_STATS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_flask_page.app"><code class="docutils literal notranslate"><span class="pre">app()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_flask_page.client"><code class="docutils literal notranslate"><span class="pre">client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_flask_page.test_analysis_page_buttons"><code class="docutils literal notranslate"><span class="pre">test_analysis_page_buttons()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_flask_page.test_create_app"><code class="docutils literal notranslate"><span class="pre">test_create_app()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_flask_page.test_grad_cafe_page_renders"><code class="docutils literal notranslate"><span class="pre">test_grad_cafe_page_renders()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_flask_page.test_page_contains_stat_categories_and_values"><code class="docutils literal notranslate"><span class="pre">test_page_contains_stat_categories_and_values()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_flask_page.test_routes_exist"><code class="docutils literal notranslate"><span class="pre">test_routes_exist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests-test-buttons">tests.test_buttons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_buttons.FAKE_ROWS"><code class="docutils literal notranslate"><span class="pre">FAKE_ROWS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_buttons.FAKE_STATS"><code class="docutils literal notranslate"><span class="pre">FAKE_STATS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_buttons.client"><code class="docutils literal notranslate"><span class="pre">client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_buttons.patch_thread"><code class="docutils literal notranslate"><span class="pre">patch_thread()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_buttons.test_pull_data_exception"><code class="docutils literal notranslate"><span class="pre">test_pull_data_exception()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_buttons.test_pull_data_returns_200"><code class="docutils literal notranslate"><span class="pre">test_pull_data_returns_200()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_buttons.test_pull_data_triggers_loader"><code class="docutils literal notranslate"><span class="pre">test_pull_data_triggers_loader()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_buttons.test_pull_data_triggers_refresh"><code class="docutils literal notranslate"><span class="pre">test_pull_data_triggers_refresh()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_buttons.test_read_state_file_not_found"><code class="docutils literal notranslate"><span class="pre">test_read_state_file_not_found()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_buttons.test_refresh_busy"><code class="docutils literal notranslate"><span class="pre">test_refresh_busy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_buttons.test_update_analysis_busy"><code class="docutils literal notranslate"><span class="pre">test_update_analysis_busy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_buttons.test_update_analysis_exception"><code class="docutils literal notranslate"><span class="pre">test_update_analysis_exception()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_buttons.test_update_analysis_returns_200"><code class="docutils literal notranslate"><span class="pre">test_update_analysis_returns_200()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_buttons.test_update_analysis_triggers_update_data"><code class="docutils literal notranslate"><span class="pre">test_update_analysis_triggers_update_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests-test-analysis-format">tests.test_analysis_format</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#purpose">Purpose</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#why-render-through-flask-instead-of-opening-the-file-directly">Why render through Flask instead of opening the file directly</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_analysis_format.FAKE_STATE"><code class="docutils literal notranslate"><span class="pre">FAKE_STATE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_analysis_format.FAKE_STATS"><code class="docutils literal notranslate"><span class="pre">FAKE_STATS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_analysis_format.soup"><code class="docutils literal notranslate"><span class="pre">soup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_analysis_format.soup_high_precision"><code class="docutils literal notranslate"><span class="pre">soup_high_precision()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_analysis_format.test_buttons_exist"><code class="docutils literal notranslate"><span class="pre">test_buttons_exist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_analysis_format.test_labels_and_answers"><code class="docutils literal notranslate"><span class="pre">test_labels_and_answers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_analysis_format.test_percentages_two_decimals"><code class="docutils literal notranslate"><span class="pre">test_percentages_two_decimals()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests-test-integration-end-to-end">tests.test_integration_end_to_end</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.app"><code class="docutils literal notranslate"><span class="pre">app()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.client"><code class="docutils literal notranslate"><span class="pre">client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.fake_scraper_injected_data"><code class="docutils literal notranslate"><span class="pre">fake_scraper_injected_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.instant_thread"><code class="docutils literal notranslate"><span class="pre">instant_thread()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_end_to_end_pull_update_render"><code class="docutils literal notranslate"><span class="pre">test_end_to_end_pull_update_render()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_enrich_with_details_realistic"><code class="docutils literal notranslate"><span class="pre">test_enrich_with_details_realistic()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_multiple_pulls_unique_records"><code class="docutils literal notranslate"><span class="pre">test_multiple_pulls_unique_records()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_refresh_button_conflict"><code class="docutils literal notranslate"><span class="pre">test_refresh_button_conflict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_refresh_button_success"><code class="docutils literal notranslate"><span class="pre">test_refresh_button_success()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_refresh_no_new_records"><code class="docutils literal notranslate"><span class="pre">test_refresh_no_new_records()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_refresh_with_new_records"><code class="docutils literal notranslate"><span class="pre">test_refresh_with_new_records()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_refresh_with_seen_ids"><code class="docutils literal notranslate"><span class="pre">test_refresh_with_seen_ids()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_run_py_main_block_coverage"><code class="docutils literal notranslate"><span class="pre">test_run_py_main_block_coverage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_scrape_new_records_all_branches"><code class="docutils literal notranslate"><span class="pre">test_scrape_new_records_all_branches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_start_app_creates_flask_instance"><code class="docutils literal notranslate"><span class="pre">test_start_app_creates_flask_instance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_sync_db_from_llm_file"><code class="docutils literal notranslate"><span class="pre">test_sync_db_from_llm_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_update_analysis_conflict"><code class="docutils literal notranslate"><span class="pre">test_update_analysis_conflict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_update_analysis_conflict_during_pull"><code class="docutils literal notranslate"><span class="pre">test_update_analysis_conflict_during_pull()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_update_analysis_hits_all_update_data_branches"><code class="docutils literal notranslate"><span class="pre">test_update_analysis_hits_all_update_data_branches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_update_data_empty_file"><code class="docutils literal notranslate"><span class="pre">test_update_data_empty_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_update_data_file_not_found"><code class="docutils literal notranslate"><span class="pre">test_update_data_file_not_found()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests.test_integration_end_to_end.test_write_new_applicant_file"><code class="docutils literal notranslate"><span class="pre">test_write_new_applicant_file()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Module 4</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Testing Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/testing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="testing-guide">
+<h1>Testing Guide<a class="headerlink" href="#testing-guide" title="Link to this heading"></a></h1>
+<p>The test suite is organized into five marker groups, each targeting a
+different layer of the application. All tests run offline using
+<code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code> and <code class="docutils literal notranslate"><span class="pre">tmp_path</span></code> — no real database or network connection
+is required except where noted.</p>
+<section id="running-tests">
+<h2>Running tests<a class="headerlink" href="#running-tests" title="Link to this heading"></a></h2>
+<p>Run everything:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest
+</pre></div>
+</div>
+<p>Run one marker group with verbose output:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>-m<span class="w"> </span>integration<span class="w"> </span>-v
+pytest<span class="w"> </span>-m<span class="w"> </span>db<span class="w"> </span>-v
+pytest<span class="w"> </span>-m<span class="w"> </span>analysis<span class="w"> </span>-v
+pytest<span class="w"> </span>-m<span class="w"> </span>buttons<span class="w"> </span>-v
+pytest<span class="w"> </span>-m<span class="w"> </span>web<span class="w"> </span>-v
+</pre></div>
+</div>
+<p>Run a single file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>tests/test_db_insert.py<span class="w"> </span>-v
+</pre></div>
+</div>
+<p>Run with coverage:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>--cov<span class="o">=</span>src<span class="w"> </span>--cov-report<span class="o">=</span>html
+</pre></div>
+</div>
+</section>
+<section id="markers">
+<h2>Markers<a class="headerlink" href="#markers" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 25.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Marker</p></th>
+<th class="head"><p>File</p></th>
+<th class="head"><p>What it covers</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">integration</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_integration_end_to_end.py</span></code></p></td>
+<td><p>Full pipeline: Flask startup, <code class="docutils literal notranslate"><span class="pre">/refresh</span></code>, <code class="docutils literal notranslate"><span class="pre">/update-analysis</span></code>,
+scraper branches, enrichment, file I/O, DB sync, end-to-end flow</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">db</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_db_insert.py</span></code></p></td>
+<td><p>Database writes: insert on pull, uniqueness constraints,
+<code class="docutils literal notranslate"><span class="pre">get_application_stats</span></code> key coverage</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">analysis</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_analysis_format.py</span></code>, <code class="docutils literal notranslate"><span class="pre">test_flask_page.py</span></code></p></td>
+<td><p>HTML rendering: label/value pairs, percentage rounding,
+Flask app factory, route registration</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">buttons</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_buttons.py</span></code></p></td>
+<td><p>Button routes: <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/refresh</span></code>, <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code>,
+busy-state 409 gating, exception handling</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">web</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_flask_page.py</span></code>, <code class="docutils literal notranslate"><span class="pre">test_buttons.py</span></code></p></td>
+<td><p>State file defaults, app config, route existence</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="fixtures">
+<h2>Fixtures<a class="headerlink" href="#fixtures" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">instant_thread</span></code> / <code class="docutils literal notranslate"><span class="pre">patch_thread</span></code></dt><dd><p>Replaces <code class="docutils literal notranslate"><span class="pre">threading.Thread</span></code> with a synchronous stand-in so background
+jobs triggered by button routes complete immediately before assertions run.
+Used in <code class="docutils literal notranslate"><span class="pre">test_buttons.py</span></code> and <code class="docutils literal notranslate"><span class="pre">test_integration_end_to_end.py</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">client</span></code></dt><dd><p>Flask test client. Used in <code class="docutils literal notranslate"><span class="pre">test_flask_page.py</span></code>, <code class="docutils literal notranslate"><span class="pre">test_buttons.py</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">test_integration_end_to_end.py</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">app</span></code></dt><dd><p>Minimal Flask app with a simple template written to <code class="docutils literal notranslate"><span class="pre">tmp_path</span></code>.
+Used in integration tests where the real template is not needed.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">soup</span></code> / <code class="docutils literal notranslate"><span class="pre">soup_high_precision</span></code></dt><dd><p>Renders the real <code class="docutils literal notranslate"><span class="pre">gradcafe_stats.html</span></code> Jinja template through a Flask
+test client and returns a parsed <code class="docutils literal notranslate"><span class="pre">BeautifulSoup</span></code> object. Used in
+<code class="docutils literal notranslate"><span class="pre">test_analysis_format.py</span></code> so formatting tests run against the live
+template rather than a hardcoded copy.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">fake_scraper_injected_data</span></code></dt><dd><p>A scraper payload containing adversarial inputs (SQL injection, XSS,
+prompt injection, Log4Shell) used to verify the pipeline handles
+untrusted data safely.</p>
+</dd>
+</dl>
+</section>
+<section id="module-tests.test_scraper_function">
+<span id="test-file-reference"></span><h2>Test file reference<a class="headerlink" href="#module-tests.test_scraper_function" title="Link to this heading"></a></h2>
+<section id="tests-test-scraper-clean">
+<h3>tests.test_scraper_clean<a class="headerlink" href="#tests-test-scraper-clean" title="Link to this heading"></a></h3>
+<p>Tests for the initial GradCafe data pipeline: scraping and cleaning.</p>
+<p>This file covers the backend work required to pull the <strong>initial dataset</strong>
+from the GradCafe website. That dataset serves as the foundation for the
+entire application — everything else (LLM enrichment, DB sync, analysis)
+builds on top of it via the re-scrape flow.</p>
+<p>Modules under test:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="api.html#module-src.scrape.scrape" title="src.scrape.scrape"><code class="xref py py-mod docutils literal notranslate"><span class="pre">src.scrape.scrape</span></code></a> — HTTP fetching, HTML parsing, detail-page
+enrichment, and file I/O for the raw scraped data.</p></li>
+<li><p><a class="reference internal" href="api.html#module-src.scrape.clean" title="src.scrape.clean"><code class="xref py py-mod docutils literal notranslate"><span class="pre">src.scrape.clean</span></code></a> — Normalization of raw records into the final
+application schema.</p></li>
+<li><p><a class="reference internal" href="api.html#src.refresh_gradcafe.get_seen_ids_from_llm_extend_file" title="src.refresh_gradcafe.get_seen_ids_from_llm_extend_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.refresh_gradcafe.get_seen_ids_from_llm_extend_file()</span></code></a> — ID
+deduplication helper used across scrape runs.</p></li>
+</ul>
+<p>All tests are marked <code class="docutils literal notranslate"><span class="pre">database</span></code> and use <code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code> / <code class="docutils literal notranslate"><span class="pre">tmp_path</span></code>
+to avoid touching real network or disk resources.</p>
+</section>
+<dl class="py data">
+<dt class="sig sig-object py" id="tests.test_scraper_function.FAKE_DETAIL_EMPTY">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">FAKE_DETAIL_EMPTY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\n&lt;main&gt;&lt;dl&gt;&lt;/dl&gt;&lt;/main&gt;\n'</span></span><a class="headerlink" href="#tests.test_scraper_function.FAKE_DETAIL_EMPTY" title="Link to this definition"></a></dt>
+<dd><p>Detail page with an empty <code class="docutils literal notranslate"><span class="pre">&lt;dl&gt;</span></code> — triggers all default/empty return paths.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tests.test_scraper_function.FAKE_DETAIL_HTML">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">FAKE_DETAIL_HTML</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\n&lt;main&gt;\n</span>&#160;&#160;&#160; <span class="pre">&lt;dl&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;div&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;dt&gt;Program&lt;/dt&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;dd&gt;Political</span> <span class="pre">Science&lt;/dd&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;/div&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;div&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;dt&gt;Degree</span> <span class="pre">Type&lt;/dt&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;dd&gt;PhD&lt;/dd&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;/div&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;div&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;dt&gt;Notes&lt;/dt&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;dd&gt;&lt;/dd&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;/div&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;div&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;dt&gt;Undergrad</span> <span class="pre">GPA&lt;/dt&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;dd&gt;3.90&lt;/dd&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;/div&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;div&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;span&gt;GRE</span> <span class="pre">General:&lt;/span&gt;&lt;span&gt;0&lt;/span&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;/div&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;div&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;span&gt;GRE</span> <span class="pre">Verbal:&lt;/span&gt;&lt;span&gt;0&lt;/span&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;/div&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;div&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;span&gt;Analytical</span> <span class="pre">Writing:&lt;/span&gt;&lt;span&gt;0.00&lt;/span&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;/div&gt;\n</span>&#160;&#160;&#160; <span class="pre">&lt;/dl&gt;\n&lt;/main&gt;\n'</span></span><a class="headerlink" href="#tests.test_scraper_function.FAKE_DETAIL_HTML" title="Link to this definition"></a></dt>
+<dd><p>A realistic GradCafe detail-page HTML containing GPA and GRE scores.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tests.test_scraper_function.FAKE_SURVEY_EMPTY">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">FAKE_SURVEY_EMPTY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\n&lt;tr&gt;&lt;td</span> <span class="pre">colspan=&quot;4&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;\n&lt;tr&gt;&lt;td</span> <span class="pre">colspan=&quot;4&quot;&gt;&lt;div&gt;Fall</span> <span class="pre">2026&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;\n&lt;tr&gt;&lt;td</span> <span class="pre">colspan=&quot;4&quot;&gt;&lt;div&gt;US&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;\n&lt;tr&gt;&lt;td</span> <span class="pre">colspan=&quot;4&quot;&gt;&lt;div&gt;Some</span> <span class="pre">result</span> <span class="pre">without</span> <span class="pre">link&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;\n'</span></span><a class="headerlink" href="#tests.test_scraper_function.FAKE_SURVEY_EMPTY" title="Link to this definition"></a></dt>
+<dd><p>Survey HTML with metadata rows and a row that has no result link (triggers <code class="docutils literal notranslate"><span class="pre">continue</span></code>).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tests.test_scraper_function.FAKE_SURVEY_HTML">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">FAKE_SURVEY_HTML</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\n&lt;tr&gt;\n&lt;td</span> <span class="pre">class=&quot;tw-px-3</span> <span class="pre">tw-py-5</span> <span class="pre">tw-text-sm</span> <span class="pre">tw-text-gray-500&quot;&gt;\n</span>&#160;&#160;&#160; <span class="pre">&lt;div</span> <span class="pre">class=&quot;tw-text-gray-900&quot;&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;a</span> <span class="pre">href=&quot;/result/FAKE_ID&quot;&gt;Political</span> <span class="pre">Science&lt;/a&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;svg</span> <span class="pre">viewBox=&quot;0</span> <span class="pre">0</span> <span class="pre">2</span> <span class="pre">2&quot;</span> <span class="pre">class=&quot;tw-h-0.5</span> <span class="pre">tw-w-0.5</span> <span class="pre">tw-fill-gray-400</span> <span class="pre">tw-mx-1</span> <span class="pre">tw-inline-block&quot;&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;circle</span> <span class="pre">cx=&quot;1&quot;</span> <span class="pre">cy=&quot;1&quot;</span> <span class="pre">r=&quot;1&quot;</span> <span class="pre">/&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;/svg&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;span</span> <span class="pre">class=&quot;tw-text-gray-500&quot;&gt;PhD&lt;/span&gt;\n</span>&#160;&#160;&#160; <span class="pre">&lt;/div&gt;\n&lt;/td&gt;\n&lt;td</span> <span class="pre">class=&quot;tw-px-3</span> <span class="pre">tw-py-5</span> <span class="pre">tw-text-sm</span> <span class="pre">tw-text-gray-500</span> <span class="pre">tw-whitespace-nowrap</span> <span class="pre">tw-hidden</span> <span class="pre">md:tw-table-cell</span> <span class="pre">&quot;&gt;\n</span>&#160;&#160;&#160; <span class="pre">February</span> <span class="pre">18,</span> <span class="pre">2026\n&lt;/td&gt;\n&lt;td</span> <span class="pre">class=&quot;tw-px-3</span> <span class="pre">tw-py-5</span> <span class="pre">tw-text-sm</span> <span class="pre">tw-text-gray-500</span> <span class="pre">tw-whitespace-nowrap</span> <span class="pre">tw-hidden</span> <span class="pre">md:tw-table-cell</span> <span class="pre">&quot;&gt;\n</span>&#160;&#160;&#160; <span class="pre">&lt;div</span> <span class="pre">class=&quot;tw-inline-flex</span> <span class="pre">tw-items-center</span> <span class="pre">tw-rounded-md</span> <span class="pre">tw-bg-green-50</span> <span class="pre">tw-text-green-700</span> <span class="pre">tw-ring-green-600/20</span> <span class="pre">tw-px-2</span> <span class="pre">tw-py-1</span> <span class="pre">tw-text-sm</span> <span class="pre">tw-font-medium</span> <span class="pre">tw-ring-1</span> <span class="pre">tw-ring-inset&quot;&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Accepted</span> <span class="pre">on</span> <span class="pre">13</span> <span class="pre">Feb\n</span>&#160;&#160;&#160; <span class="pre">&lt;/div&gt;\n&lt;/td&gt;\n&lt;tr</span> <span class="pre">class=&quot;tw-border-none&quot;&gt;\n</span>&#160;&#160;&#160; <span class="pre">&lt;td</span> <span class="pre">colspan=&quot;100%&quot;</span> <span class="pre">class=&quot;tw-pb-5</span> <span class="pre">tw-pr-4</span> <span class="pre">sm:tw-pl-0</span> <span class="pre">tw-pl-4&quot;&gt;\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;p</span> <span class="pre">class=&quot;tw-text-gray-500</span> <span class="pre">tw-text-sm</span> <span class="pre">tw-my-0&quot;&gt;4a/1w/4r/2p\n\nGpa</span> <span class="pre">is</span> <span class="pre">grad.</span> <span class="pre">IR</span> <span class="pre">subfield.&lt;/p&gt;\n</span>&#160;&#160;&#160; <span class="pre">&lt;/td&gt;\n&lt;/tr&gt;\n'</span></span><a class="headerlink" href="#tests.test_scraper_function.FAKE_SURVEY_HTML" title="Link to this definition"></a></dt>
+<dd><p>A single realistic GradCafe survey-page row (Political Science PhD, accepted).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tests.test_scraper_function.FAKE_SURVEY_HTML_METADATA">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">FAKE_SURVEY_HTML_METADATA</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\n&lt;tr&gt;&lt;td</span> <span class="pre">colspan=&quot;4&quot;&gt;&lt;div&gt;Random</span> <span class="pre">text</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">term</span> <span class="pre">or</span> <span class="pre">citizenship&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;\n&lt;tr&gt;&lt;td</span> <span class="pre">colspan=&quot;4&quot;&gt;&lt;div&gt;Fall</span> <span class="pre">2025&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;\n&lt;tr&gt;&lt;td</span> <span class="pre">colspan=&quot;4&quot;&gt;&lt;div&gt;international&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;\n'</span></span><a class="headerlink" href="#tests.test_scraper_function.FAKE_SURVEY_HTML_METADATA" title="Link to this definition"></a></dt>
+<dd><p>Survey HTML containing metadata rows (term and citizenship) but no main result row.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.fast_sleep">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">fast_sleep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.fast_sleep" title="Link to this definition"></a></dt>
+<dd><p>Disable <code class="docutils literal notranslate"><span class="pre">time.sleep</span></code> globally so retry loops complete instantly.</p>
+<p>Applied automatically to every test in this module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> (<em>pytest.MonkeyPatch</em>) – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_clean_text_none">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_clean_text_none</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_clean_text_none" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">_clean_text</span></code> returns an empty string when passed <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_empty_detail_fields">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_empty_detail_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_empty_detail_fields" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">_scrape_detail_page</span></code> returns empty strings for all fields on a blank page.</p>
+<p>Patches <code class="docutils literal notranslate"><span class="pre">_fetch_html</span></code> to return <a class="reference internal" href="#tests.test_scraper_function.FAKE_DETAIL_EMPTY" title="tests.test_scraper_function.FAKE_DETAIL_EMPTY"><code class="xref py py-data docutils literal notranslate"><span class="pre">FAKE_DETAIL_EMPTY</span></code></a> (an empty
+<code class="docutils literal notranslate"><span class="pre">&lt;dl&gt;</span></code>) and asserts every field defaults to <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_extract_gre_scores_continue_branch">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_extract_gre_scores_continue_branch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_extract_gre_scores_continue_branch" title="Link to this definition"></a></dt>
+<dd><p>Verify the <code class="docutils literal notranslate"><span class="pre">continue</span></code> branch fires when a GRE label span has no following span.</p>
+<p>Passes a single <code class="docutils literal notranslate"><span class="pre">&quot;GRE</span> <span class="pre">General:&quot;</span></code> span with no value span so that
+<code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">+</span> <span class="pre">1</span> <span class="pre">&gt;=</span> <span class="pre">len(spans)</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> and the loop skips the
+assignment block entirely.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_extract_undergrad_gpa_placeholder_branch">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_extract_undergrad_gpa_placeholder_branch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_extract_undergrad_gpa_placeholder_branch" title="Link to this definition"></a></dt>
+<dd><p>Verify the <code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">&quot;&quot;</span></code> branch inside <code class="docutils literal notranslate"><span class="pre">_extract_undergrad_gpa</span></code> is reached.</p>
+<p>Passes a <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code> GPA value through the full function call path
+(including the internal <code class="docutils literal notranslate"><span class="pre">_extract_dt_dd</span></code> call) to confirm the
+normalization branch executes correctly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture (unused; soup built inline).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_extract_undergrad_gpa_zero_values">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_extract_undergrad_gpa_zero_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_extract_undergrad_gpa_zero_values" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">_extract_undergrad_gpa</span></code> normalizes placeholder zero values to <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>.</p>
+<p>Covers both <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;0.00&quot;</span></code> placeholder forms that GradCafe
+uses when a GPA was not submitted.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_fetch_html_fail">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_fetch_html_fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_fetch_html_fail" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">_fetch_html</span></code> raises after exhausting all retries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_fetch_html_retry">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_fetch_html_retry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_fetch_html_retry" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">_fetch_html</span></code> retries on transient errors and succeeds.</p>
+<p>Simulates two failures followed by a successful response and asserts
+that the function returns the decoded body after the retries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_get_seen_ids_file_not_found">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_get_seen_ids_file_not_found</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_get_seen_ids_file_not_found" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">get_seen_ids_from_llm_extend_file</span></code> returns an empty set when the file is missing.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_get_seen_ids_json_decode_error">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_get_seen_ids_json_decode_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_get_seen_ids_json_decode_error" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">get_seen_ids_from_llm_extend_file</span></code> skips lines with invalid JSON.</p>
+<p>Writes one malformed JSON line and asserts the result is an empty set
+(the bad line is skipped rather than raising).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Pytest-provided temporary directory.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_get_seen_ids_no_url">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_get_seen_ids_no_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_get_seen_ids_no_url" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">get_seen_ids_from_llm_extend_file</span></code> skips records that have no <code class="docutils literal notranslate"><span class="pre">url_link</span></code>.</p>
+<p>Writes a valid JSON object that lacks the <code class="docutils literal notranslate"><span class="pre">url_link</span></code> key and asserts
+the result is an empty set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Pytest-provided temporary directory.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_gre_scores_missing_next_span">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_gre_scores_missing_next_span</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_gre_scores_missing_next_span" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">_extract_gre_scores</span></code> returns empty strings when the value span is absent.</p>
+<p>Passes HTML with a label span but no following value span, which
+triggers the <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">i</span> <span class="pre">+</span> <span class="pre">1</span> <span class="pre">&gt;=</span> <span class="pre">len(spans):</span> <span class="pre">continue</span></code> guard.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_gre_scores_skip_non_label_span">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_gre_scores_skip_non_label_span</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_gre_scores_skip_non_label_span" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">_extract_gre_scores</span></code> ignores spans whose text does not end with <code class="docutils literal notranslate"><span class="pre">:</span></code>.</p>
+<p>The span <code class="docutils literal notranslate"><span class="pre">&quot;Random</span> <span class="pre">text&quot;</span></code> does not match the label pattern so no
+scores should be assigned.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_load_data_reads_json">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_load_data_reads_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_load_data_reads_json" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">clean.load_data</span></code> reads raw JSON and <code class="docutils literal notranslate"><span class="pre">clean_data</span></code> normalizes it.</p>
+<p>Writes two sample records to a temp file, patches <code class="docutils literal notranslate"><span class="pre">RAW_FILE</span></code>, and asserts:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">load_data</span></code> returns a list of length 2 with correct field values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_norm</span></code> strips whitespace and handles empty strings.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">clean_data</span></code> preserves program names, GPAs, comments, and statuses.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Pytest-provided temporary directory.</p></li>
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_normalize_status_branches">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_normalize_status_branches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_normalize_status_branches" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">_normalize_status</span></code> covers all decision-status normalization branches.</p>
+<p>Tests each branch in order:</p>
+<ol class="arabic simple">
+<li><p>Empty / <code class="docutils literal notranslate"><span class="pre">None</span></code> input returns <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>.</p></li>
+<li><p>Waitlist variations normalize to <code class="docutils literal notranslate"><span class="pre">&quot;Waitlisted&quot;</span></code>.</p></li>
+<li><p>Interview variations normalize to <code class="docutils literal notranslate"><span class="pre">&quot;Interview&quot;</span></code>.</p></li>
+<li><p>Accepted/Rejected with a parseable date → <code class="docutils literal notranslate"><span class="pre">&quot;Decision:</span> <span class="pre">D</span> <span class="pre">Mon&quot;</span></code> format.</p></li>
+<li><p>Accepted/Rejected without a date → bare decision word.</p></li>
+<li><p>All other statuses are returned unchanged.</p></li>
+</ol>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_parse_survey_page_metadata_assignment_with_main_result">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_parse_survey_page_metadata_assignment_with_main_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_parse_survey_page_metadata_assignment_with_main_result" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">_parse_survey_page</span></code> assigns term and citizenship metadata to the record.</p>
+<p>The HTML contains one main result row followed by metadata rows for
+<code class="docutils literal notranslate"><span class="pre">&quot;Fall</span> <span class="pre">2025&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;international&quot;</span></code>. Asserts that both are attached
+to the parsed record via the metadata-assignment branches.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_parse_survey_page_skip_no_link">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_parse_survey_page_skip_no_link</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_parse_survey_page_skip_no_link" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">_parse_survey_page</span></code> skips rows that have no result link.</p>
+<p>The first row has no <code class="docutils literal notranslate"><span class="pre">&lt;a</span> <span class="pre">href=&quot;/result/...&quot;&gt;</span></code> so it triggers the
+<code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">not</span> <span class="pre">link:</span> <span class="pre">continue</span></code> branch. Only the second row should be returned.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_save_data_with_gradcafe_format">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_save_data_with_gradcafe_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_save_data_with_gradcafe_format" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">scrape.save_data</span></code> writes JSON correctly and prints confirmation.</p>
+<p>Uses two realistic GradCafe-format records and asserts that:</p>
+<ul class="simple">
+<li><p>The output file is created.</p></li>
+<li><p>The loaded JSON matches the input exactly.</p></li>
+<li><p>The printed message contains the record count and file path.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Pytest-provided temporary directory.</p></li>
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_save_data_writes_file_and_prints">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_save_data_writes_file_and_prints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_save_data_writes_file_and_prints" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">clean.save_data</span></code> writes cleaned JSON and prints a confirmation message.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Pytest-provided temporary directory.</p></li>
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_scrape_data">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_scrape_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_scrape_data" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">scrape_data</span></code> runs the full survey + detail pipeline and writes output.</p>
+<p>Patches <code class="docutils literal notranslate"><span class="pre">_fetch_html</span></code> to return survey HTML for survey URLs and
+detail HTML otherwise, limits scraping to 1 record, and asserts that:</p>
+<ul class="simple">
+<li><p>Exactly one record is returned.</p></li>
+<li><p>The output JSON file is created.</p></li>
+<li><p>Survey fields (<code class="docutils literal notranslate"><span class="pre">result_id</span></code>, <code class="docutils literal notranslate"><span class="pre">url_link</span></code>, <code class="docutils literal notranslate"><span class="pre">date_added</span></code>) are populated.</p></li>
+<li><p>Detail fields (<code class="docutils literal notranslate"><span class="pre">program_name</span></code>, <code class="docutils literal notranslate"><span class="pre">gpa</span></code>, GRE scores) are merged in correctly.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Pytest-provided temporary directory.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_scrape_detail_page">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_scrape_detail_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_scrape_detail_page" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">_scrape_detail_page</span></code> extracts all fields from a realistic detail page.</p>
+<p>Patches <code class="docutils literal notranslate"><span class="pre">_fetch_html</span></code> to return <a class="reference internal" href="#tests.test_scraper_function.FAKE_DETAIL_HTML" title="tests.test_scraper_function.FAKE_DETAIL_HTML"><code class="xref py py-data docutils literal notranslate"><span class="pre">FAKE_DETAIL_HTML</span></code></a> and asserts
+that GPA is extracted correctly and that zero-value GRE scores are
+normalized to empty strings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_survey_page_break">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_survey_page_break</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_survey_page_break" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">scrape_data</span></code> exits cleanly when a survey page returns no results.</p>
+<p>Passes blank HTML so <code class="docutils literal notranslate"><span class="pre">_parse_survey_page</span></code> returns <code class="docutils literal notranslate"><span class="pre">[]</span></code>, triggering
+the <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">not</span> <span class="pre">page_results:</span> <span class="pre">break</span></code> early-exit branch. Asserts the
+function returns an empty list without raising.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_scraper_function.test_survey_page_continue_and_metadata">
+<span class="sig-prename descclassname"><span class="pre">tests.test_scraper_function.</span></span><span class="sig-name descname"><span class="pre">test_survey_page_continue_and_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_scraper_function.test_survey_page_continue_and_metadata" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">scrape_data</span></code> correctly assigns metadata even when rows lack result links.</p>
+<p>Uses <a class="reference internal" href="#tests.test_scraper_function.FAKE_SURVEY_EMPTY" title="tests.test_scraper_function.FAKE_SURVEY_EMPTY"><code class="xref py py-data docutils literal notranslate"><span class="pre">FAKE_SURVEY_EMPTY</span></code></a> which contains metadata rows for
+<code class="docutils literal notranslate"><span class="pre">&quot;Fall</span> <span class="pre">2026&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;US&quot;</span></code> but no anchor link. For any records
+that do get parsed, asserts the metadata fields are set correctly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="tests-test-db-insert">
+<span id="module-tests.test_db_insert"></span><h3>tests.test_db_insert<a class="headerlink" href="#tests-test-db-insert" title="Link to this heading"></a></h3>
+<p>Tests for database writes, uniqueness constraints, and query correctness.</p>
+<p>The goal of this file is to verify that the database layer loads and
+queries data correctly — entirely offline using fake connections and
+cursors, with no real PostgreSQL instance required.</p>
+<p>Covers three spec requirements:</p>
+<ol class="arabic simple">
+<li><p><strong>Insert on pull</strong> — target table starts empty; after a load operation,
+new rows exist with all required non-null fields populated.</p></li>
+<li><p><strong>Idempotency / uniqueness</strong> — duplicate records (same <code class="docutils literal notranslate"><span class="pre">url</span></code>) do not
+produce duplicate rows in the database.</p></li>
+<li><p><strong>Query correctness</strong> — <code class="docutils literal notranslate"><span class="pre">get_application_stats</span></code> returns a dict
+containing all expected keys.</p></li>
+</ol>
+<p>Based on <a class="reference internal" href="api.html#module-src.load_data" title="src.load_data"><code class="xref py py-mod docutils literal notranslate"><span class="pre">src.load_data</span></code></a> and <a class="reference internal" href="api.html#module-src.query_data" title="src.query_data"><code class="xref py py-mod docutils literal notranslate"><span class="pre">src.query_data</span></code></a>.
+All tests are marked <code class="docutils literal notranslate"><span class="pre">db</span></code> and run fully offline.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="tests.test_db_insert.FakeConnection">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tests.test_db_insert.</span></span><span class="sig-name descname"><span class="pre">FakeConnection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query_results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">should_fail</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.FakeConnection" title="Link to this definition"></a></dt>
+<dd><p>Fake psycopg2 connection for fully offline database tests.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query_results</strong> (<em>dict</em><em>, </em><em>optional</em>) – Passed through to the internal <a class="reference internal" href="#tests.test_db_insert.FakeCursor" title="tests.test_db_insert.FakeCursor"><code class="xref py py-class docutils literal notranslate"><span class="pre">FakeCursor</span></code></a>.</p></li>
+<li><p><strong>should_fail</strong> (<em>bool</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, calling <code class="docutils literal notranslate"><span class="pre">cursor()</span></code> raises an exception
+to simulate a connection failure.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="tests.test_db_insert.FakeConnection.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.FakeConnection.close" title="Link to this definition"></a></dt>
+<dd><p>Mark the connection as closed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tests.test_db_insert.FakeConnection.commit">
+<span class="sig-name descname"><span class="pre">commit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.FakeConnection.commit" title="Link to this definition"></a></dt>
+<dd><p>No-op commit.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tests.test_db_insert.FakeConnection.cursor">
+<span class="sig-name descname"><span class="pre">cursor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.FakeConnection.cursor" title="Link to this definition"></a></dt>
+<dd><p>Return the shared fake cursor, or raise if <code class="docutils literal notranslate"><span class="pre">should_fail</span></code> is set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – If <code class="docutils literal notranslate"><span class="pre">should_fail</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#tests.test_db_insert.FakeCursor" title="tests.test_db_insert.FakeCursor">FakeCursor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tests.test_db_insert.FakeCursor">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tests.test_db_insert.</span></span><span class="sig-name descname"><span class="pre">FakeCursor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query_results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.FakeCursor" title="Link to this definition"></a></dt>
+<dd><p>Fake psycopg2 cursor that records executed queries and captured rows.</p>
+<p>Supports <code class="docutils literal notranslate"><span class="pre">execute</span></code>, <code class="docutils literal notranslate"><span class="pre">fetchone</span></code> (with query-keyed result routing),
+and an <code class="docutils literal notranslate"><span class="pre">inserted_rows</span></code> list populated by fake <code class="docutils literal notranslate"><span class="pre">execute_values</span></code>
+helpers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>query_results</strong> (<em>dict</em><em>, </em><em>optional</em>) – Optional mapping of SQL keyword fragment to the
+tuple that <code class="docutils literal notranslate"><span class="pre">fetchone</span></code> should return when that fragment appears
+in the last executed query.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="tests.test_db_insert.FakeCursor.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.FakeCursor.execute" title="Link to this definition"></a></dt>
+<dd><p>Record a SQL query string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query</strong> (<em>str</em>) – SQL query string.</p></li>
+<li><p><strong>vars</strong> – Optional query parameters (unused).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tests.test_db_insert.FakeCursor.fetchone">
+<span class="sig-name descname"><span class="pre">fetchone</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.FakeCursor.fetchone" title="Link to this definition"></a></dt>
+<dd><p>Return a query-specific result tuple based on the last executed query.</p>
+<p>Matches against keys in <code class="docutils literal notranslate"><span class="pre">query_results</span></code>; falls back to a
+4-tuple of <code class="docutils literal notranslate"><span class="pre">None</span></code> values if no key matches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Result tuple for the last executed query.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_db_insert.fake_execute_values">
+<span class="sig-prename descclassname"><span class="pre">tests.test_db_insert.</span></span><span class="sig-name descname"><span class="pre">fake_execute_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sql</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rows</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.fake_execute_values" title="Link to this definition"></a></dt>
+<dd><p>Simulate <code class="docutils literal notranslate"><span class="pre">psycopg2.extras.execute_values</span></code> by appending rows to the cursor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cur</strong> (<a class="reference internal" href="#tests.test_db_insert.FakeCursor" title="tests.test_db_insert.FakeCursor"><em>FakeCursor</em></a>) – Fake cursor instance.</p></li>
+<li><p><strong>sql</strong> (<em>str</em>) – SQL string (unused).</p></li>
+<li><p><strong>rows</strong> (<em>list</em><em>[</em><em>tuple</em><em>]</em>) – Row tuples to capture.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_db_insert.fake_execute_values_unique">
+<span class="sig-prename descclassname"><span class="pre">tests.test_db_insert.</span></span><span class="sig-name descname"><span class="pre">fake_execute_values_unique</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sql</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rows</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.fake_execute_values_unique" title="Link to this definition"></a></dt>
+<dd><p>Simulate <code class="docutils literal notranslate"><span class="pre">execute_values</span></code> with <code class="docutils literal notranslate"><span class="pre">ON</span> <span class="pre">CONFLICT</span> <span class="pre">(url)</span> <span class="pre">DO</span> <span class="pre">NOTHING</span></code> semantics.</p>
+<p>Deduplicates on the URL field (index 3), converts empty strings to
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, and only appends genuinely new rows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cur</strong> (<a class="reference internal" href="#tests.test_db_insert.FakeCursor" title="tests.test_db_insert.FakeCursor"><em>FakeCursor</em></a>) – Fake cursor instance.</p></li>
+<li><p><strong>sql</strong> (<em>str</em>) – SQL string (unused).</p></li>
+<li><p><strong>rows</strong> (<em>list</em><em>[</em><em>tuple</em><em>]</em>) – Row tuples to insert.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_db_insert.test_execute_query_records_sql">
+<span class="sig-prename descclassname"><span class="pre">tests.test_db_insert.</span></span><span class="sig-name descname"><span class="pre">test_execute_query_records_sql</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.test_execute_query_records_sql" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">execute_query</span></code> records SQL against the fake cursor.</p>
+<p>Simulates the table setup that precedes a pull (CREATE + TRUNCATE)
+and asserts both queries are captured in order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_db_insert.test_get_application_stats_returns_all_keys">
+<span class="sig-prename descclassname"><span class="pre">tests.test_db_insert.</span></span><span class="sig-name descname"><span class="pre">test_get_application_stats_returns_all_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.test_get_application_stats_returns_all_keys" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">get_application_stats</span></code> returns a dict with all required keys.</p>
+<p>Patches <code class="docutils literal notranslate"><span class="pre">create_connection</span></code> with a <a class="reference internal" href="#tests.test_db_insert.FakeConnection" title="tests.test_db_insert.FakeConnection"><code class="xref py py-class docutils literal notranslate"><span class="pre">FakeConnection</span></code></a> whose
+<code class="docutils literal notranslate"><span class="pre">fetchone</span></code> responses are pre-seeded to match the SQL fragments used
+by each query in <code class="docutils literal notranslate"><span class="pre">query_data.py</span></code>. Asserts that:</p>
+<ul class="simple">
+<li><p>All 15 expected stat keys are present in the returned dict.</p></li>
+<li><p>The database connection is closed after the call.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_db_insert.test_postgres_connection">
+<span class="sig-prename descclassname"><span class="pre">tests.test_db_insert.</span></span><span class="sig-name descname"><span class="pre">test_postgres_connection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.test_postgres_connection" title="Link to this definition"></a></dt>
+<dd><p>Verify a fake connection can be created and a cursor retrieved.</p>
+<p>Simulates the “before” state: a usable connection exists before any
+data is inserted.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_db_insert.test_postgres_connection_failure">
+<span class="sig-prename descclassname"><span class="pre">tests.test_db_insert.</span></span><span class="sig-name descname"><span class="pre">test_postgres_connection_failure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.test_postgres_connection_failure" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">create_connection</span></code> returns <code class="docutils literal notranslate"><span class="pre">None</span></code> when the DB is unreachable.</p>
+<p>Passes deliberately wrong credentials to a port with nothing listening
+so the function hits its <code class="docutils literal notranslate"><span class="pre">except</span></code> block and returns <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_db_insert.test_rebuild_from_llm_file_inserts_rows">
+<span class="sig-prename descclassname"><span class="pre">tests.test_db_insert.</span></span><span class="sig-name descname"><span class="pre">test_rebuild_from_llm_file_inserts_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.test_rebuild_from_llm_file_inserts_rows" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">rebuild_from_llm_file</span></code> inserts one row per JSON line.</p>
+<p>Writes two realistic LLM NDJSON records to a temp file and asserts
+that both are captured by the fake <code class="docutils literal notranslate"><span class="pre">execute_values</span></code>, confirming
+the “after pull: rows exist” requirement.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Pytest-provided temporary directory.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_db_insert.test_rebuild_from_llm_file_uniqueness">
+<span class="sig-prename descclassname"><span class="pre">tests.test_db_insert.</span></span><span class="sig-name descname"><span class="pre">test_rebuild_from_llm_file_uniqueness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_db_insert.test_rebuild_from_llm_file_uniqueness" title="Link to this definition"></a></dt>
+<dd><p>Verify duplicate URLs produce only one row in the database.</p>
+<p>Writes three NDJSON records where two share the same <code class="docutils literal notranslate"><span class="pre">url_link</span></code>,
+then asserts only two unique rows were inserted — matching the
+<code class="docutils literal notranslate"><span class="pre">ON</span> <span class="pre">CONFLICT</span> <span class="pre">(url)</span> <span class="pre">DO</span> <span class="pre">NOTHING</span></code> behaviour in production.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Pytest-provided temporary directory.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="tests-test-flask-page">
+<span id="module-tests.test_flask_page"></span><h3>tests.test_flask_page<a class="headerlink" href="#tests-test-flask-page" title="Link to this heading"></a></h3>
+<p>Tests for Flask app creation and page rendering.</p>
+<p>The goal of this file is to confirm that the Flask application is wired
+up correctly and that the main analysis page is usable end-to-end:</p>
+<ul class="simple">
+<li><p>The app factory produces a correctly configured <code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Flask</span></code> instance.</p></li>
+<li><p>All expected routes are registered.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/analysis</span></code> returns HTTP 200 with the correct page structure.</p></li>
+<li><p>The page contains both action buttons (“Pull Data” and “Update Analysis”).</p></li>
+<li><p>The page renders real stat categories alongside their values.</p></li>
+</ul>
+<p>All tests are marked <code class="docutils literal notranslate"><span class="pre">analysis</span></code> and use <code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code> to avoid
+touching real database or file resources.</p>
+</section>
+<dl class="py data">
+<dt class="sig sig-object py" id="tests.test_flask_page.FAKE_STATE">
+<span class="sig-prename descclassname"><span class="pre">tests.test_flask_page.</span></span><span class="sig-name descname"><span class="pre">FAKE_STATE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'analysis_complete':</span> <span class="pre">False,</span> <span class="pre">'message':</span> <span class="pre">None,</span> <span class="pre">'pull_complete':</span> <span class="pre">False,</span> <span class="pre">'pulling_data':</span> <span class="pre">False,</span> <span class="pre">'updating_analysis':</span> <span class="pre">False}</span></span><a class="headerlink" href="#tests.test_flask_page.FAKE_STATE" title="Link to this definition"></a></dt>
+<dd><p>Clean idle state returned by the fake <code class="docutils literal notranslate"><span class="pre">read_state</span></code> in rendering tests.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tests.test_flask_page.FAKE_STATS">
+<span class="sig-prename descclassname"><span class="pre">tests.test_flask_page.</span></span><span class="sig-name descname"><span class="pre">FAKE_STATS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">namespace(fall_2026_count=14464,</span> <span class="pre">international_pct=48.33,</span> <span class="pre">avg_gpa=3.78,</span> <span class="pre">avg_gre=264.68,</span> <span class="pre">avg_gre_v=161.89,</span> <span class="pre">avg_gre_aw=4.5,</span> <span class="pre">avg_gpa_us_fall_2026=3.8,</span> <span class="pre">fall_2025_accept_pct=25.0,</span> <span class="pre">avg_gpa_fall_2025_accept=3.6,</span> <span class="pre">jhu_cs_masters=120,</span> <span class="pre">total_applicants=5000,</span> <span class="pre">fall_2026_cs_accept=200,</span> <span class="pre">fall_2026_cs_accept_llm=210,</span> <span class="pre">rejected_fall_2026_gpa_pct=15.0,</span> <span class="pre">accepted_fall_2026_gpa_pct=85.0)</span></span><a class="headerlink" href="#tests.test_flask_page.FAKE_STATS" title="Link to this definition"></a></dt>
+<dd><p>Realistic fake stats object used across rendering tests.
+Fields mirror the attributes returned by <code class="docutils literal notranslate"><span class="pre">get_application_stats()</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_flask_page.app">
+<span class="sig-prename descclassname"><span class="pre">tests.test_flask_page.</span></span><span class="sig-name descname"><span class="pre">app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_flask_page.app" title="Link to this definition"></a></dt>
+<dd><p>Create and return the Flask app in testing mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Configured Flask application instance.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>flask.Flask</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_flask_page.client">
+<span class="sig-prename descclassname"><span class="pre">tests.test_flask_page.</span></span><span class="sig-name descname"><span class="pre">client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_flask_page.client" title="Link to this definition"></a></dt>
+<dd><p>Return a Flask test client for the app fixture.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>app</strong> (<em>flask.Flask</em>) – The Flask application instance.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A test client that can make HTTP requests without a real server.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>flask.testing.FlaskClient</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_flask_page.test_analysis_page_buttons">
+<span class="sig-prename descclassname"><span class="pre">tests.test_flask_page.</span></span><span class="sig-name descname"><span class="pre">test_analysis_page_buttons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_flask_page.test_analysis_page_buttons" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/analysis</span></code> renders both action buttons.</p>
+<p>Patches <code class="docutils literal notranslate"><span class="pre">get_application_stats</span></code> via the view function globals,
+parses the response HTML with BeautifulSoup, and asserts that both
+the “Pull Data” (<code class="docutils literal notranslate"><span class="pre">btn-refresh</span></code>) and “Update Analysis”
+(<code class="docutils literal notranslate"><span class="pre">btn-update</span></code>) buttons are present.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>app</strong> (<em>flask.Flask</em>) – Flask application instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_flask_page.test_create_app">
+<span class="sig-prename descclassname"><span class="pre">tests.test_flask_page.</span></span><span class="sig-name descname"><span class="pre">test_create_app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_flask_page.test_create_app" title="Link to this definition"></a></dt>
+<dd><p>Verify the app factory returns a correctly configured Flask instance.</p>
+<p>Asserts that:</p>
+<ul class="simple">
+<li><p>The returned object is a <code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Flask</span></code> instance.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SECRET_KEY</span></code> is set to <code class="docutils literal notranslate"><span class="pre">&quot;dev&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">WTF_CSRF_ENABLED</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">pages</span></code> blueprint is registered.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_flask_page.test_grad_cafe_page_renders">
+<span class="sig-prename descclassname"><span class="pre">tests.test_flask_page.</span></span><span class="sig-name descname"><span class="pre">test_grad_cafe_page_renders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_flask_page.test_grad_cafe_page_renders" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/</span></code> returns HTTP 200 and renders key stat values.</p>
+<p>Patches <code class="docutils literal notranslate"><span class="pre">get_application_stats</span></code> and <code class="docutils literal notranslate"><span class="pre">read_state</span></code> so the route
+does not touch the database or state file, then asserts that the
+rendered HTML contains representative stat values from
+<a class="reference internal" href="#tests.test_flask_page.FAKE_STATS" title="tests.test_flask_page.FAKE_STATS"><code class="xref py py-data docutils literal notranslate"><span class="pre">FAKE_STATS</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – Flask test client.</p></li>
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_flask_page.test_page_contains_stat_categories_and_values">
+<span class="sig-prename descclassname"><span class="pre">tests.test_flask_page.</span></span><span class="sig-name descname"><span class="pre">test_page_contains_stat_categories_and_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_flask_page.test_page_contains_stat_categories_and_values" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/analysis</span></code> renders at least one stat category alongside its value.</p>
+<p>Patches <code class="docutils literal notranslate"><span class="pre">get_application_stats</span></code> and checks the full page text for
+any matching label/value pair from the expected stat display. This
+confirms that the template is wiring stat categories to their
+computed values correctly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>app</strong> (<em>flask.Flask</em>) – Flask application instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_flask_page.test_routes_exist">
+<span class="sig-prename descclassname"><span class="pre">tests.test_flask_page.</span></span><span class="sig-name descname"><span class="pre">test_routes_exist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_flask_page.test_routes_exist" title="Link to this definition"></a></dt>
+<dd><p>Verify all expected application routes are registered.</p>
+<p>Checks that <code class="docutils literal notranslate"><span class="pre">/</span></code>, <code class="docutils literal notranslate"><span class="pre">/analysis</span></code>, <code class="docutils literal notranslate"><span class="pre">/refresh</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">/update-analysis</span></code> are all present in the URL map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>app</strong> (<em>flask.Flask</em>) – Flask application instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="tests-test-buttons">
+<span id="module-tests.test_buttons"></span><h3>tests.test_buttons<a class="headerlink" href="#tests-test-buttons" title="Link to this heading"></a></h3>
+<p>Tests for button-triggered Flask routes and busy-state gating.</p>
+<p>The two main user actions on the application are:</p>
+<ul class="simple">
+<li><p><strong>Pull Data</strong> (<code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/refresh</span></code>) — triggers a background scrape of
+GradCafe for new applicant records and saves them to disk. The user
+sees a status indicator while this runs; the scraped rows are never
+shown directly but feed into the analysis step.</p></li>
+<li><p><strong>Update Analysis</strong> (<code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code>) — reads the saved
+records, runs them through an LLM for standardization, writes the
+results back to the database, and refreshes the stats page.</p></li>
+</ul>
+<p>Both routes use a shared state file to prevent concurrent runs. If
+either job is already in progress, the routes return HTTP 409.</p>
+<p>All scraper, LLM, and database calls are mocked so these tests run
+fully offline. Threading is patched to run synchronously so background
+jobs complete before assertions are evaluated.</p>
+<p>Tests are marked <code class="docutils literal notranslate"><span class="pre">buttons</span></code> (button route tests) or <code class="docutils literal notranslate"><span class="pre">web</span></code>
+(state/infrastructure tests).</p>
+</section>
+<dl class="py data">
+<dt class="sig sig-object py" id="tests.test_buttons.FAKE_ROWS">
+<span class="sig-prename descclassname"><span class="pre">tests.test_buttons.</span></span><span class="sig-name descname"><span class="pre">FAKE_ROWS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[{'International/US':</span> <span class="pre">'International',</span> <span class="pre">'applicant_status':</span> <span class="pre">'Accepted:</span> <span class="pre">3</span> <span class="pre">Feb',</span> <span class="pre">'comments':</span> <span class="pre">'Had</span> <span class="pre">a</span> <span class="pre">great</span> <span class="pre">interview</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">PI...',</span> <span class="pre">'date_added':</span> <span class="pre">'February</span> <span class="pre">08,</span> <span class="pre">2026',</span> <span class="pre">'degree_type':</span> <span class="pre">'PhD',</span> <span class="pre">'gpa':</span> <span class="pre">'3.80',</span> <span class="pre">'gre_analytical_writing':</span> <span class="pre">'',</span> <span class="pre">'gre_general':</span> <span class="pre">'',</span> <span class="pre">'gre_verbal':</span> <span class="pre">'',</span> <span class="pre">'program_name':</span> <span class="pre">'Mechanical</span> <span class="pre">And</span> <span class="pre">Aerospace</span> <span class="pre">Engineering',</span> <span class="pre">'start_term':</span> <span class="pre">'Fall</span> <span class="pre">2026',</span> <span class="pre">'university':</span> <span class="pre">'George</span> <span class="pre">Washington</span> <span class="pre">University',</span> <span class="pre">'url_link':</span> <span class="pre">'https://www.thegradcafe.com/result/997885'},</span> <span class="pre">{'International/US':</span> <span class="pre">'US',</span> <span class="pre">'applicant_status':</span> <span class="pre">'Rejected:</span> <span class="pre">6</span> <span class="pre">Feb',</span> <span class="pre">'comments':</span> <span class="pre">'',</span> <span class="pre">'date_added':</span> <span class="pre">'February</span> <span class="pre">08,</span> <span class="pre">2026',</span> <span class="pre">'degree_type':</span> <span class="pre">'PhD',</span> <span class="pre">'gpa':</span> <span class="pre">'',</span> <span class="pre">'gre_analytical_writing':</span> <span class="pre">'',</span> <span class="pre">'gre_general':</span> <span class="pre">'',</span> <span class="pre">'gre_verbal':</span> <span class="pre">'',</span> <span class="pre">'program_name':</span> <span class="pre">'Computer</span> <span class="pre">Science',</span> <span class="pre">'start_term':</span> <span class="pre">'Fall</span> <span class="pre">2026',</span> <span class="pre">'university':</span> <span class="pre">'Stanford</span> <span class="pre">University',</span> <span class="pre">'url_link':</span> <span class="pre">'https://www.thegradcafe.com/result/997884'}]</span></span><a class="headerlink" href="#tests.test_buttons.FAKE_ROWS" title="Link to this definition"></a></dt>
+<dd><p>Two realistic GradCafe-format applicant records used to simulate
+scraper output in loader and pull-data tests.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tests.test_buttons.FAKE_STATS">
+<span class="sig-prename descclassname"><span class="pre">tests.test_buttons.</span></span><span class="sig-name descname"><span class="pre">FAKE_STATS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'accepted_fall_2026_gpa_pct':</span> <span class="pre">0,</span> <span class="pre">'avg_gpa':</span> <span class="pre">3.5,</span> <span class="pre">'avg_gpa_fall_2025_accept':</span> <span class="pre">3.5,</span> <span class="pre">'avg_gpa_us_fall_2026':</span> <span class="pre">3.5,</span> <span class="pre">'avg_gre':</span> <span class="pre">320,</span> <span class="pre">'avg_gre_aw':</span> <span class="pre">4.5,</span> <span class="pre">'avg_gre_v':</span> <span class="pre">160,</span> <span class="pre">'fall_2025_accept_pct':</span> <span class="pre">0,</span> <span class="pre">'fall_2026_count':</span> <span class="pre">0,</span> <span class="pre">'fall_2026_cs_accept':</span> <span class="pre">0,</span> <span class="pre">'fall_2026_cs_accept_llm':</span> <span class="pre">0,</span> <span class="pre">'international_pct':</span> <span class="pre">0,</span> <span class="pre">'jhu_cs_masters':</span> <span class="pre">0,</span> <span class="pre">'rejected_fall_2026_gpa_pct':</span> <span class="pre">0,</span> <span class="pre">'total_applicants':</span> <span class="pre">0}</span></span><a class="headerlink" href="#tests.test_buttons.FAKE_STATS" title="Link to this definition"></a></dt>
+<dd><p>Minimal fake stats dict returned by <code class="docutils literal notranslate"><span class="pre">get_application_stats</span></code> in
+tests that need the analysis page to render without a real DB.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_buttons.client">
+<span class="sig-prename descclassname"><span class="pre">tests.test_buttons.</span></span><span class="sig-name descname"><span class="pre">client</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_buttons.client" title="Link to this definition"></a></dt>
+<dd><p>Create a Flask test client in testing mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Flask test client.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>flask.testing.FlaskClient</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_buttons.patch_thread">
+<span class="sig-prename descclassname"><span class="pre">tests.test_buttons.</span></span><span class="sig-name descname"><span class="pre">patch_thread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_buttons.patch_thread" title="Link to this definition"></a></dt>
+<dd><p>Replace <code class="docutils literal notranslate"><span class="pre">threading.Thread</span></code> with a synchronous stand-in.</p>
+<p>Ensures background jobs triggered by button routes complete
+immediately so assertions can evaluate their side-effects
+without race conditions.</p>
+<p>Applied automatically to every test in this module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> (<em>pytest.MonkeyPatch</em>) – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_buttons.test_pull_data_exception">
+<span class="sig-prename descclassname"><span class="pre">tests.test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_pull_data_exception</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_buttons.test_pull_data_exception" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/refresh</span></code> handles a scraper exception gracefully.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">refresh()</span></code> raises, the route should still redirect (302) and
+the state file should record the error message with
+<code class="docutils literal notranslate"><span class="pre">pulling_data=False</span></code> and <code class="docutils literal notranslate"><span class="pre">pull_complete=False</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>client</strong> – Flask test client.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_buttons.test_pull_data_returns_200">
+<span class="sig-prename descclassname"><span class="pre">tests.test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_pull_data_returns_200</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_buttons.test_pull_data_returns_200" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/refresh</span></code> followed by redirect returns HTTP 200.</p>
+<p>Follows the redirect to the analysis page and confirms the page
+loads successfully after a pull completes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>client</strong> – Flask test client.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_buttons.test_pull_data_triggers_loader">
+<span class="sig-prename descclassname"><span class="pre">tests.test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_pull_data_triggers_loader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_buttons.test_pull_data_triggers_loader" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/refresh</span></code> runs the full scrape-and-save pipeline.</p>
+<p>Patches the individual scraper functions inside <code class="docutils literal notranslate"><span class="pre">refresh_gradcafe</span></code>
+and confirms that <code class="docutils literal notranslate"><span class="pre">write_new_applicant_file</span></code> is called with the
+rows returned by the fake scraper. This validates that the Pull Data
+button triggers the loader, not just a no-op.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>client</strong> – Flask test client.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_buttons.test_pull_data_triggers_refresh">
+<span class="sig-prename descclassname"><span class="pre">tests.test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_pull_data_triggers_refresh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_buttons.test_pull_data_triggers_refresh" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/refresh</span></code> calls <code class="docutils literal notranslate"><span class="pre">refresh()</span></code> and redirects.</p>
+<p>Asserts that:</p>
+<ul class="simple">
+<li><p>The response status is 302 (redirect to analysis page).</p></li>
+<li><p>The fake <code class="docutils literal notranslate"><span class="pre">refresh()</span></code> function was actually invoked, confirming
+the Pull Data button wires through to the scrape pipeline.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>client</strong> – Flask test client.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_buttons.test_read_state_file_not_found">
+<span class="sig-prename descclassname"><span class="pre">tests.test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_read_state_file_not_found</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_buttons.test_read_state_file_not_found" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">read_state</span></code> returns safe defaults when the state file is missing.</p>
+<p>Patches <code class="docutils literal notranslate"><span class="pre">STATE_FILE</span></code> to a path that does not exist and asserts that
+<code class="docutils literal notranslate"><span class="pre">read_state</span></code> returns the expected default values rather than raising.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Pytest-provided temporary directory.</p></li>
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_buttons.test_refresh_busy">
+<span class="sig-prename descclassname"><span class="pre">tests.test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_refresh_busy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_buttons.test_refresh_busy" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/refresh</span></code> returns 409 when any job is already running.</p>
+<p>Tests both busy conditions:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pulling_data=True</span></code> — a pull is already in progress.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">updating_analysis=True</span></code> — an analysis update is in progress.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>client</strong> – Flask test client.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_buttons.test_update_analysis_busy">
+<span class="sig-prename descclassname"><span class="pre">tests.test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_update_analysis_busy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_buttons.test_update_analysis_busy" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> returns 409 when any job is already running.</p>
+<p>Tests both busy conditions:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pulling_data=True</span></code> — a pull is already in progress.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">updating_analysis=True</span></code> — an analysis update is already running.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>client</strong> – Flask test client.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_buttons.test_update_analysis_exception">
+<span class="sig-prename descclassname"><span class="pre">tests.test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_update_analysis_exception</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_buttons.test_update_analysis_exception" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> handles an LLM exception gracefully.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">update_data()</span></code> raises, the route should still redirect (302)
+and the state file should record the error with
+<code class="docutils literal notranslate"><span class="pre">updating_analysis=False</span></code> and <code class="docutils literal notranslate"><span class="pre">analysis_complete=False</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>client</strong> – Flask test client.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_buttons.test_update_analysis_returns_200">
+<span class="sig-prename descclassname"><span class="pre">tests.test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_update_analysis_returns_200</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_buttons.test_update_analysis_returns_200" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> followed by redirect returns HTTP 200.</p>
+<p>Follows the redirect to the analysis page and confirms it renders
+successfully after an update completes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>client</strong> – Flask test client.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_buttons.test_update_analysis_triggers_update_data">
+<span class="sig-prename descclassname"><span class="pre">tests.test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_update_analysis_triggers_update_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_buttons.test_update_analysis_triggers_update_data" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> calls <code class="docutils literal notranslate"><span class="pre">update_data</span></code> and <code class="docutils literal notranslate"><span class="pre">sync_db_from_llm_file</span></code>.</p>
+<p>The Update Analysis route should run LLM enrichment (<code class="docutils literal notranslate"><span class="pre">update_data</span></code>)
+and then sync the results into the database (<code class="docutils literal notranslate"><span class="pre">sync_db_from_llm_file</span></code>).
+Asserts both are called and the response is a 302 redirect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>client</strong> – Flask test client.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="tests-test-analysis-format">
+<span id="module-tests.test_analysis_format"></span><h3>tests.test_analysis_format<a class="headerlink" href="#tests-test-analysis-format" title="Link to this heading"></a></h3>
+<p>Tests for analysis page HTML structure, label formatting, and numeric rounding.</p>
+<section id="purpose">
+<h4>Purpose<a class="headerlink" href="#purpose" title="Link to this heading"></a></h4>
+<p>This file tests the <strong>visual contract</strong> of the analysis page — that every
+stat category renders with a visible label and a correctly formatted value.
+It is primarily an HTML formatting test: it renders the real Jinja template
+(<code class="docutils literal notranslate"><span class="pre">gradcafe_stats.html</span></code>) through a minimal Flask test client and parses the
+resulting HTML with BeautifulSoup.</p>
+</section>
+<section id="why-render-through-flask-instead-of-opening-the-file-directly">
+<h4>Why render through Flask instead of opening the file directly<a class="headerlink" href="#why-render-through-flask-instead-of-opening-the-file-directly" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">gradcafe_stats.html</span></code> is a Jinja2 template that uses <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">extends</span> <span class="pre">%}</span></code>,
+<code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">block</span> <span class="pre">%}</span></code>, and <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">}}</span></code> expressions. Opening it with
+<code class="xref py py-func docutils literal notranslate"><span class="pre">pathlib.Path.read_text()</span></code> or BeautifulSoup directly would expose raw
+template syntax rather than rendered HTML — BeautifulSoup would see
+<code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">stats.avg_gpa</span> <span class="pre">}}</span></code> instead of <code class="docutils literal notranslate"><span class="pre">&quot;3.78&quot;</span></code>. Flask’s test client is the
+correct way to render Jinja templates: it processes the full inheritance
+chain (<code class="docutils literal notranslate"><span class="pre">base.html</span></code> → <code class="docutils literal notranslate"><span class="pre">gradcafe_stats.html</span></code>), evaluates all expressions,
+and returns the final HTML that a browser would receive.</p>
+<p>This means the formatting tests are <strong>dynamic</strong> — they test the real
+template file. If a label is renamed, a <code class="docutils literal notranslate"><span class="pre">&lt;em&gt;</span></code> becomes a <code class="docutils literal notranslate"><span class="pre">&lt;span&gt;</span></code>, or
+a new stat is added without a corresponding label, the tests will fail and
+tell you exactly what broke.</p>
+<p><code class="docutils literal notranslate"><span class="pre">get_application_stats</span></code> and <code class="docutils literal notranslate"><span class="pre">read_state</span></code> are monkeypatched with fake
+data so no real database or state file is needed.</p>
+<p>Covers two spec requirements:</p>
+<ol class="arabic simple">
+<li><p><strong>Labels and answers</strong> — every stat category has a visible label
+(<code class="docutils literal notranslate"><span class="pre">&lt;strong&gt;</span></code>) paired with its computed value (<code class="docutils literal notranslate"><span class="pre">&lt;em&gt;</span></code>), and the
+values match the stats object exactly.</p></li>
+<li><p><strong>Percentage rounding</strong> — all percentage fields are formatted to
+exactly two decimal places, regardless of the precision of the
+underlying float.</p></li>
+</ol>
+<p>All tests are marked <code class="docutils literal notranslate"><span class="pre">analysis</span></code>.</p>
+</section>
+</section>
+<dl class="py data">
+<dt class="sig sig-object py" id="tests.test_analysis_format.FAKE_STATE">
+<span class="sig-prename descclassname"><span class="pre">tests.test_analysis_format.</span></span><span class="sig-name descname"><span class="pre">FAKE_STATE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'analysis_complete':</span> <span class="pre">False,</span> <span class="pre">'message':</span> <span class="pre">None,</span> <span class="pre">'pull_complete':</span> <span class="pre">False,</span> <span class="pre">'pulling_data':</span> <span class="pre">False,</span> <span class="pre">'updating_analysis':</span> <span class="pre">False}</span></span><a class="headerlink" href="#tests.test_analysis_format.FAKE_STATE" title="Link to this definition"></a></dt>
+<dd><p>Idle state returned by the fake <code class="docutils literal notranslate"><span class="pre">read_state</span></code> so no status banners
+or auto-refresh tags appear in the rendered HTML.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tests.test_analysis_format.FAKE_STATS">
+<span class="sig-prename descclassname"><span class="pre">tests.test_analysis_format.</span></span><span class="sig-name descname"><span class="pre">FAKE_STATS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">namespace(total_applicants=1000,</span> <span class="pre">fall_2026_count=500,</span> <span class="pre">international_pct=48.33,</span> <span class="pre">avg_gpa=3.78,</span> <span class="pre">avg_gre=264.68,</span> <span class="pre">avg_gre_v=161.89,</span> <span class="pre">avg_gre_aw=4.5,</span> <span class="pre">avg_gpa_us_fall_2026=3.8,</span> <span class="pre">fall_2025_accept_pct=25.0,</span> <span class="pre">avg_gpa_fall_2025_accept=3.6,</span> <span class="pre">jhu_cs_masters=120,</span> <span class="pre">fall_2026_cs_accept=200,</span> <span class="pre">fall_2026_cs_accept_llm=210,</span> <span class="pre">rejected_fall_2026_gpa_pct=15.0,</span> <span class="pre">accepted_fall_2026_gpa_pct=85.0)</span></span><a class="headerlink" href="#tests.test_analysis_format.FAKE_STATS" title="Link to this definition"></a></dt>
+<dd><p>Realistic stats dict passed to the template via the monkeypatched
+<code class="docutils literal notranslate"><span class="pre">get_application_stats</span></code>. Uses a plain dict rather than SimpleNamespace
+because the real function returns a dict and Jinja accesses keys via
+dot notation through the stats object returned by query_data.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_analysis_format.soup">
+<span class="sig-prename descclassname"><span class="pre">tests.test_analysis_format.</span></span><span class="sig-name descname"><span class="pre">soup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_analysis_format.soup" title="Link to this definition"></a></dt>
+<dd><p>Render the real <code class="docutils literal notranslate"><span class="pre">gradcafe_stats.html</span></code> template and return parsed HTML.</p>
+<p>Creates a Flask test client, patches <code class="docutils literal notranslate"><span class="pre">get_application_stats</span></code> and
+<code class="docutils literal notranslate"><span class="pre">read_state</span></code> with fake data, hits <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/analysis</span></code>, and returns
+the response parsed by BeautifulSoup. All tests in this file share
+this fixture so they always parse the live template rather than a
+hardcoded copy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> (<em>pytest.MonkeyPatch</em>) – Pytest monkeypatch fixture.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parsed HTML of the rendered analysis page.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bs4.BeautifulSoup</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_analysis_format.soup_high_precision">
+<span class="sig-prename descclassname"><span class="pre">tests.test_analysis_format.</span></span><span class="sig-name descname"><span class="pre">soup_high_precision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_analysis_format.soup_high_precision" title="Link to this definition"></a></dt>
+<dd><p>Render the template with high-precision float stats for rounding tests.</p>
+<p>Uses percentage values with many decimal places (e.g. <code class="docutils literal notranslate"><span class="pre">45.6789</span></code>)
+to verify the template’s <code class="docutils literal notranslate"><span class="pre">&quot;%.2f&quot;</span></code> Jinja filter truncates correctly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> (<em>pytest.MonkeyPatch</em>) – Pytest monkeypatch fixture.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parsed HTML of the rendered analysis page.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bs4.BeautifulSoup</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_analysis_format.test_buttons_exist">
+<span class="sig-prename descclassname"><span class="pre">tests.test_analysis_format.</span></span><span class="sig-name descname"><span class="pre">test_buttons_exist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_analysis_format.test_buttons_exist" title="Link to this definition"></a></dt>
+<dd><p>Verify the Pull Data and Update Analysis buttons are present in the rendered page.</p>
+<p>Parses the real template and confirms both <code class="docutils literal notranslate"><span class="pre">btn-refresh</span></code> and
+<code class="docutils literal notranslate"><span class="pre">btn-update</span></code> button elements are rendered. If the template’s button
+classes or form structure changes, this test will catch it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>soup</strong> (<em>bs4.BeautifulSoup</em>) – Parsed HTML of the rendered analysis page.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_analysis_format.test_labels_and_answers">
+<span class="sig-prename descclassname"><span class="pre">tests.test_analysis_format.</span></span><span class="sig-name descname"><span class="pre">test_labels_and_answers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_analysis_format.test_labels_and_answers" title="Link to this definition"></a></dt>
+<dd><p>Verify every stat category label is paired with the correct rendered value.</p>
+<p>Parses the real rendered template and asserts that for each expected
+<code class="docutils literal notranslate"><span class="pre">&lt;strong&gt;</span></code> label, the immediately following <code class="docutils literal notranslate"><span class="pre">&lt;em&gt;</span></code> contains the
+correctly formatted value. This confirms the template wires each stat
+category to its computed answer and that the Jinja formatting
+expressions (<code class="docutils literal notranslate"><span class="pre">&quot;%.2f&quot;|format(...)</span></code>) produce the expected output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>soup</strong> (<em>bs4.BeautifulSoup</em>) – Parsed HTML of the rendered analysis page.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_analysis_format.test_percentages_two_decimals">
+<span class="sig-prename descclassname"><span class="pre">tests.test_analysis_format.</span></span><span class="sig-name descname"><span class="pre">test_percentages_two_decimals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup_high_precision</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_analysis_format.test_percentages_two_decimals" title="Link to this definition"></a></dt>
+<dd><p>Verify the template rounds all percentage fields to exactly two decimal places.</p>
+<p>Uses the <code class="docutils literal notranslate"><span class="pre">soup_high_precision</span></code> fixture which passes floats with many
+decimal places (e.g. <code class="docutils literal notranslate"><span class="pre">45.6789</span></code>) into the real template and asserts
+that Jinja’s <code class="docutils literal notranslate"><span class="pre">&quot;%.2f&quot;|format(...)</span></code> filter produces the correct
+two-decimal output with a trailing <code class="docutils literal notranslate"><span class="pre">%</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>soup_high_precision</strong> (<em>bs4.BeautifulSoup</em>) – Parsed HTML rendered with high-precision stats.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="tests-test-integration-end-to-end">
+<span id="module-tests.test_integration_end_to_end"></span><h3>tests.test_integration_end_to_end<a class="headerlink" href="#tests-test-integration-end-to-end" title="Link to this heading"></a></h3>
+<p>End-to-end and integration tests for the GradCafe data pipeline.</p>
+<p>These tests cover the full lifecycle of the application:</p>
+<ul class="simple">
+<li><p>Flask app startup</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/refresh</span></code> — scraping and deduplication</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> — LLM enrichment and DB sync</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/analysis</span></code> — stats rendering</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scrape_new_records</span></code> branch coverage</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">enrich_with_details</span></code> via ThreadPoolExecutor</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">write_new_applicant_file</span></code> file I/O</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">refresh()</span></code> full pipeline</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">update_data()</span></code> LLM processing branches</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sync_db_from_llm_file()</span></code> NDJSON-to-DB insertion</p></li>
+</ul>
+<p>All tests use <code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code> and <code class="docutils literal notranslate"><span class="pre">tmp_path</span></code> to avoid touching real
+disk, network, or database resources.</p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.app">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">app</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.app" title="Link to this definition"></a></dt>
+<dd><p>Create a minimal Flask app for rendering tests.</p>
+<p>Writes a simple <code class="docutils literal notranslate"><span class="pre">gradcafe_stats.html</span></code> template into <code class="docutils literal notranslate"><span class="pre">tmp_path</span></code>
+and registers the pages blueprint so all routes are available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Pytest-provided temporary directory.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Configured Flask application in testing mode.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>flask.Flask</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.client">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.client" title="Link to this definition"></a></dt>
+<dd><p>Return a Flask test client for the app fixture.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>app</strong> (<em>flask.Flask</em>) – The Flask application instance.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A test client that can make HTTP requests without a real server.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>flask.testing.FlaskClient</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.fake_scraper_injected_data">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">fake_scraper_injected_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.fake_scraper_injected_data" title="Link to this definition"></a></dt>
+<dd><p>Return a scraper payload containing adversarial inputs.</p>
+<p>Each record simulates a different injection attack to verify that
+the pipeline handles untrusted scraped data safely:</p>
+<ul class="simple">
+<li><p>SQL injection (<code class="docutils literal notranslate"><span class="pre">program_name</span></code>, <code class="docutils literal notranslate"><span class="pre">university</span></code>)</p></li>
+<li><p>XSS (<code class="docutils literal notranslate"><span class="pre">university</span></code>)</p></li>
+<li><p>Prompt injection (<code class="docutils literal notranslate"><span class="pre">comments</span></code>)</p></li>
+<li><p>Log4Shell (<code class="docutils literal notranslate"><span class="pre">comments</span></code>)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of three adversarial applicant record dicts.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.instant_thread">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">instant_thread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.instant_thread" title="Link to this definition"></a></dt>
+<dd><p>Replace <code class="docutils literal notranslate"><span class="pre">threading.Thread</span></code> with a synchronous stand-in.</p>
+<p>Background jobs normally run in a daemon thread, which makes tests
+non-deterministic. This fixture replaces <code class="docutils literal notranslate"><span class="pre">threading.Thread</span></code> in
+<code class="docutils literal notranslate"><span class="pre">src.app.pages</span></code> so that <code class="docutils literal notranslate"><span class="pre">start()</span></code> calls the target function
+immediately in the same thread.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> (<em>pytest.MonkeyPatch</em>) – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_end_to_end_pull_update_render">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_end_to_end_pull_update_render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instant_thread</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_end_to_end_pull_update_render" title="Link to this definition"></a></dt>
+<dd><p>Full happy-path integration test: pull -&gt; update analysis -&gt; render page.</p>
+<p>Covers all four spec requirements for the end-to-end flow:</p>
+<ol class="arabic simple">
+<li><p><strong>Inject a fake scraper that returns multiple records</strong> - two fake
+applicant records are returned by the patched <code class="docutils literal notranslate"><span class="pre">refresh()</span></code>.</p></li>
+<li><p><strong>POST /refresh succeeds and rows are in DB</strong> - <code class="docutils literal notranslate"><span class="pre">sync_db_from_llm_file</span></code>
+is captured via <code class="docutils literal notranslate"><span class="pre">db_synced</span></code> and asserted to have been called.</p></li>
+<li><p><strong>POST /update-analysis succeeds (when not busy)</strong> - state file starts
+empty (not busy); asserts a 302 redirect.</p></li>
+<li><p><strong>GET /analysis shows updated analysis with correctly formatted values</strong>
+- <code class="docutils literal notranslate"><span class="pre">get_application_stats</span></code> is patched to return structured data;
+the template is updated to render <code class="docutils literal notranslate"><span class="pre">total_applicants</span></code> and
+<code class="docutils literal notranslate"><span class="pre">acceptance_rate</span></code>; the response body is asserted to contain
+<code class="docutils literal notranslate"><span class="pre">b&quot;2</span> <span class="pre">applicants&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">b&quot;67%&quot;</span></code>.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – Flask test client.</p></li>
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Temporary directory for the state file and template.</p></li>
+<li><p><strong>instant_thread</strong> – Fixture that makes threading synchronous.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_enrich_with_details_realistic">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_enrich_with_details_realistic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_enrich_with_details_realistic" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">enrich_with_details</span></code> merges detail-page data into records.</p>
+<p>Patches <code class="docutils literal notranslate"><span class="pre">scrape._scrape_detail_page</span></code> to return controlled detail
+dicts and asserts that each record is updated with the enriched
+values while original fields that were not overridden remain intact.</p>
+<p>Covers the <code class="docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code> mapping path inside
+<code class="docutils literal notranslate"><span class="pre">enrich_with_details</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_multiple_pulls_unique_records">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_multiple_pulls_unique_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instant_thread</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_multiple_pulls_unique_records" title="Link to this definition"></a></dt>
+<dd><p>Verify two pulls with overlapping data produce exactly 3 unique records.</p>
+<p>Simulates the uniqueness policy by running <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/refresh</span></code> twice:</p>
+<ul class="simple">
+<li><p><strong>Pull 1</strong> adds records 1001 and 1002.</p></li>
+<li><p><strong>Pull 2</strong> attempts to add 1002 (duplicate) and 1003 (new).</p></li>
+</ul>
+<p>Asserts that the LLM output file contains exactly records
+<code class="docutils literal notranslate"><span class="pre">[&quot;1001&quot;,</span> <span class="pre">&quot;1002&quot;,</span> <span class="pre">&quot;1003&quot;]</span></code> with no duplicates.</p>
+<p>Also exercises <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> and <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/analysis</span></code> to
+confirm the full pipeline completes successfully after deduplication.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – Flask test client.</p></li>
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Temporary directory for LLM and state files.</p></li>
+<li><p><strong>instant_thread</strong> – Fixture that makes threading synchronous.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_refresh_button_conflict">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_refresh_button_conflict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_refresh_button_conflict" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/refresh</span></code> returns 409 when a pull is already running.</p>
+<p>Pre-writes a state file with <code class="docutils literal notranslate"><span class="pre">pulling_data=True</span></code> to simulate a
+pull already in progress, then asserts the endpoint rejects the
+request with HTTP 409.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – Flask test client.</p></li>
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>tmp_path</strong> – Temporary directory for the state file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_refresh_button_success">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_refresh_button_success</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instant_thread</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_refresh_button_success" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/refresh</span></code> runs the background pull and redirects.</p>
+<p>Asserts that:</p>
+<ul class="simple">
+<li><p>The response status is 302 (redirect).</p></li>
+<li><p>The fake <code class="docutils literal notranslate"><span class="pre">refresh()</span></code> function was actually called.</p></li>
+<li><p>The state file reflects <code class="docutils literal notranslate"><span class="pre">pulling_data=False</span></code> and <code class="docutils literal notranslate"><span class="pre">pull_complete=True</span></code>
+once the job finishes.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – Flask test client.</p></li>
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>tmp_path</strong> – Temporary directory for the state file.</p></li>
+<li><p><strong>instant_thread</strong> – Fixture that makes threading synchronous.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_refresh_no_new_records">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_refresh_no_new_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_refresh_no_new_records" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">refresh()</span></code> returns 0 when the scraper finds nothing new.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_refresh_with_new_records">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_refresh_with_new_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_refresh_with_new_records" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">refresh()</span></code> writes new records to disk and returns the correct count.</p>
+<p>Patches all dependencies (scraper, enricher, cleaner, file writer) and
+asserts that:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">result[&quot;new&quot;]</span></code> equals the number of fake rows.</p></li>
+<li><p>The output file contains exactly the fake rows.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Temporary directory for the output file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_refresh_with_seen_ids">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_refresh_with_seen_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instant_thread</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fake_scraper_injected_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_refresh_with_seen_ids" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/refresh</span></code> skips already-seen record IDs.</p>
+<p>Seeds the LLM output file with one existing record (result ID 997873),
+then triggers a pull containing that record plus two new ones.</p>
+<p>Asserts that:</p>
+<ul class="simple">
+<li><p>The response is a 302 redirect.</p></li>
+<li><p>The state file shows <code class="docutils literal notranslate"><span class="pre">pull_complete=True</span></code>.</p></li>
+<li><p>The LLM file contains exactly 3 lines (1 seed + 2 new; 997873 skipped).</p></li>
+<li><p>The duplicate URL appears exactly once in the file.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – Flask test client.</p></li>
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>tmp_path</strong> – Temporary directory for state and LLM files.</p></li>
+<li><p><strong>instant_thread</strong> – Fixture that makes threading synchronous.</p></li>
+<li><p><strong>fake_scraper_injected_data</strong> – Adversarial scraper payload fixture.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_run_py_main_block_coverage">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_run_py_main_block_coverage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_run_py_main_block_coverage" title="Link to this definition"></a></dt>
+<dd><p>Execute the <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">__name__</span> <span class="pre">==</span> <span class="pre">'__main__'</span></code> block in <code class="docutils literal notranslate"><span class="pre">run.py</span></code>.</p>
+<p>Sets the <code class="docutils literal notranslate"><span class="pre">TEST_MAIN</span></code> environment variable so the block exits
+cleanly, then uses <code class="xref py py-func docutils literal notranslate"><span class="pre">runpy.run_path()</span></code> to trigger it.
+This ensures coverage tools see that branch as executed.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_scrape_new_records_all_branches">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_scrape_new_records_all_branches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page_results_sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seen_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_new_count</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_scrape_new_records_all_branches" title="Link to this definition"></a></dt>
+<dd><p>Parametrized test covering all branches in <code class="docutils literal notranslate"><span class="pre">scrape_new_records</span></code>.</p>
+<p>Two scenarios are tested:</p>
+<ol class="arabic simple">
+<li><p><strong>Early return via SEEN_LIMIT</strong> - first page contains a new record,
+second page contains an already-seen record, triggering the
+<code class="docutils literal notranslate"><span class="pre">consecutive_seen</span> <span class="pre">&gt;=</span> <span class="pre">SEEN_LIMIT</span></code> early exit.</p></li>
+<li><p><strong>Empty-page break</strong> - all records are new across two pages; the
+third page is empty, triggering the loop’s <code class="docutils literal notranslate"><span class="pre">break</span></code> condition.</p></li>
+</ol>
+<p>In both cases, asserts that:</p>
+<ul class="simple">
+<li><p>The number of returned new records matches <code class="docutils literal notranslate"><span class="pre">expected_new_count</span></code>.</p></li>
+<li><p>No returned record ID is present in <code class="docutils literal notranslate"><span class="pre">seen_ids</span></code>.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>page_results_sequence</strong> (<em>list</em><em>[</em><em>list</em><em>[</em><em>dict</em><em>]</em><em>]</em>) – List of per-page result lists to return
+from the fake parser, in order.</p></li>
+<li><p><strong>seen_ids</strong> (<em>set</em><em>[</em><em>int</em><em>]</em>) – Set of already-seen result IDs (as integers).</p></li>
+<li><p><strong>expected_new_count</strong> (<em>int</em>) – Expected number of new records returned.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_start_app_creates_flask_instance">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_start_app_creates_flask_instance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_start_app_creates_flask_instance" title="Link to this definition"></a></dt>
+<dd><p>Verify the Flask app starts and the root endpoint returns HTTP 200.</p>
+<p>Calls <code class="docutils literal notranslate"><span class="pre">start_app(test_mode=True)</span></code> and asserts that:</p>
+<ul class="simple">
+<li><p>The returned object is a <code class="xref py py-class docutils literal notranslate"><span class="pre">flask.Flask</span></code> instance.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/</span></code> request to the test client returns status 200.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_sync_db_from_llm_file">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_sync_db_from_llm_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_sync_db_from_llm_file" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">sync_db_from_llm_file</span></code> parses NDJSON and inserts the correct row tuple.</p>
+<p>Patches <code class="docutils literal notranslate"><span class="pre">builtins.open</span></code> to return one NDJSON record and patches
+<code class="docutils literal notranslate"><span class="pre">create_connection</span></code> and <code class="docutils literal notranslate"><span class="pre">execute_values</span></code> to capture inserted rows
+without touching a real database.</p>
+<p>Asserts that:</p>
+<ul class="simple">
+<li><p>Exactly one row was inserted.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">row[0]</span></code> is the concatenated <code class="docutils literal notranslate"><span class="pre">&quot;program</span> <span class="pre">-</span> <span class="pre">university&quot;</span></code> string.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">row[2]</span></code> is a parsed <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code> equal to <code class="docutils literal notranslate"><span class="pre">2026-02-01</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">row[7]</span></code> (GPA) is <code class="docutils literal notranslate"><span class="pre">4.0</span></code> as a float.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">row[8]</span></code> (GRE general) is <code class="docutils literal notranslate"><span class="pre">320.0</span></code> as a float.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_update_analysis_conflict">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_update_analysis_conflict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_update_analysis_conflict" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> returns 409 when analysis is already running.</p>
+<p>Pre-writes a state file with <code class="docutils literal notranslate"><span class="pre">updating_analysis=True</span></code> and asserts
+that the endpoint rejects the request with HTTP 409.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – Flask test client.</p></li>
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Temporary directory for the state file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_update_analysis_conflict_during_pull">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_update_analysis_conflict_during_pull</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_update_analysis_conflict_during_pull" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> returns 409 when a pull is already running.</p>
+<p>Pre-writes a state file with <code class="docutils literal notranslate"><span class="pre">pulling_data=True</span></code> and asserts that
+the endpoint also rejects update-analysis requests during an active pull.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – Flask test client.</p></li>
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+<li><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Temporary directory for the state file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_update_analysis_hits_all_update_data_branches">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_update_analysis_hits_all_update_data_branches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_update_analysis_hits_all_update_data_branches" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">update_data</span></code> processes all rows and calls the LLM once per row.</p>
+<p>Patches <code class="docutils literal notranslate"><span class="pre">_call_llm</span></code> with a fake that returns standardized program
+and university names, and patches <code class="docutils literal notranslate"><span class="pre">builtins.open</span></code> so that reading
+<code class="docutils literal notranslate"><span class="pre">NEW_APPLICANT_FILE</span></code> returns three fake applicant rows.</p>
+<p>Asserts that:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">processed_count</span></code> equals 3.</p></li>
+<li><p>The LLM was called exactly 3 times (once per row).</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_update_data_empty_file">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_update_data_empty_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_update_data_empty_file" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">update_data</span></code> returns 0 when the applicant file is empty (<code class="docutils literal notranslate"><span class="pre">[]</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_update_data_file_not_found">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_update_data_file_not_found</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_update_data_file_not_found" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">update_data</span></code> returns 0 when the applicant file does not exist.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tests.test_integration_end_to_end.test_write_new_applicant_file">
+<span class="sig-prename descclassname"><span class="pre">tests.test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_write_new_applicant_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_integration_end_to_end.test_write_new_applicant_file" title="Link to this definition"></a></dt>
+<dd><p>Verify <code class="docutils literal notranslate"><span class="pre">write_new_applicant_file</span></code> creates the output file correctly.</p>
+<p>Asserts that:</p>
+<ul class="simple">
+<li><p>The output file is created at the patched path.</p></li>
+<li><p>The JSON contents match the input records after cleaning.</p></li>
+<li><p>A summary print statement containing <code class="docutils literal notranslate"><span class="pre">&quot;Wrote</span> <span class="pre">1</span> <span class="pre">records&quot;</span></code> is emitted.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tmp_path</strong> (<em>pathlib.Path</em>) – Pytest-provided temporary directory.</p></li>
+<li><p><strong>monkeypatch</strong> – Pytest monkeypatch fixture.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Jayna Bartel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
