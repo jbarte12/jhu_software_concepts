@@ -157,7 +157,7 @@ def fake_execute_values_unique(cur, sql, rows):
 
 
 # ============================================================
-# INSERT ON PULL
+# SPEC 1: INSERT ON PULL
 # ============================================================
 
 @pytest.mark.db
@@ -271,11 +271,26 @@ def test_rebuild_from_llm_file_inserts_rows(monkeypatch, tmp_path):
 
     rebuild_from_llm_file(path=str(llm_file))
 
-    assert len(fake_conn.cursor_obj.inserted_rows) == len(llm_data)
+    rows = fake_conn.cursor_obj.inserted_rows
+    assert len(rows) == len(llm_data)
+
+    # Required fields that must never be None after a pull.
+    # Optional fields (gpa, gre scores) are allowed to be None.
+    # Row tuple index map (matches INSERT order in load_data.py):
+    #   0: program, 1: comments, 2: date_added, 3: url,
+    #   4: status, 5: term, 6: us_or_international,
+    #   7: gpa, 8: gre, 9: gre_v, 10: gre_aw,
+    #   11: degree, 12: llm_generated_program, 13: llm_generated_university
+    for row in rows:
+        assert row[0] is not None, "program must not be None"
+        assert row[2] is not None, "date_added must not be None"
+        assert row[3] is not None, "url must not be None"
+        assert row[4] is not None, "status must not be None"
+        assert row[5] is not None, "term must not be None"
 
 
 # ============================================================
-# IDEMPOTENCY / UNIQUENESS
+# SPEC 2: IDEMPOTENCY / UNIQUENESS
 # ============================================================
 
 @pytest.mark.db
@@ -363,7 +378,7 @@ def test_rebuild_from_llm_file_uniqueness(monkeypatch, tmp_path):
 
 
 # ============================================================
-# QUERY CORRECTNESS
+# SPEC 3: QUERY CORRECTNESS
 # ============================================================
 
 @pytest.mark.db

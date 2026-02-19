@@ -1,13 +1,46 @@
-# tests/test_buttons.py
-import pytest
+"""
+tests.test_buttons
+===================
+
+Tests for button-triggered Flask routes and busy-state gating.
+
+The two main user actions on the application are:
+
+- **Pull Data** (``POST /refresh``) — triggers a background scrape of
+  GradCafe for new applicant records and saves them to disk. The user
+  sees a status indicator while this runs; the scraped rows are never
+  shown directly but feed into the analysis step.
+- **Update Analysis** (``POST /update-analysis``) — reads the saved
+  records, runs them through an LLM for standardization, writes the
+  results back to the database, and refreshes the stats page.
+
+Both routes use a shared state file to prevent concurrent runs. If
+either job is already in progress, the routes return HTTP 409.
+
+All scraper, LLM, and database calls are mocked so these tests run
+fully offline. Threading is patched to run synchronously so background
+jobs complete before assertions are evaluated.
+
+Tests are marked ``buttons`` (button route tests) or ``web``
+(state/infrastructure tests).
+"""
+
 import threading
-from src.run import create_app
-from src.app.pages import write_state, read_state
-import src.refresh_gradcafe as refresh_module
+import pytest
+
 import src.app.pages as pages
+import src.refresh_gradcafe as refresh_module
+from src.run import create_app
+from src.app.pages import read_state, write_state
 
 
-fake_stats = {
+# ============================================================
+# SHARED CONSTANTS
+# ============================================================
+
+#: Minimal fake stats dict returned by ``get_application_stats`` in
+#: tests that need the analysis page to render without a real DB.
+FAKE_STATS = {
     "total_applicants": 0,
     "fall_2026_count": 0,
     "international_pct": 0,
@@ -22,11 +55,12 @@ fake_stats = {
     "fall_2026_cs_accept": 0,
     "fall_2026_cs_accept_llm": 0,
     "rejected_fall_2026_gpa_pct": 0,
-    "accepted_fall_2026_gpa_pct": 0
+    "accepted_fall_2026_gpa_pct": 0,
 }
 
-# Fake rows in GradCafe format
-fake_rows = [
+#: Two realistic GradCafe-format applicant records used to simulate
+#: scraper output in loader and pull-data tests.
+FAKE_ROWS = [
     {
         "program_name": "Mechanical And Aerospace Engineering",
         "university": "George Washington University",
@@ -40,7 +74,7 @@ fake_rows = [
         "gre_general": "",
         "gre_verbal": "",
         "gre_analytical_writing": "",
-        "gpa": "3.80"
+        "gpa": "3.80",
     },
     {
         "program_name": "Computer Science",
@@ -55,222 +89,69 @@ fake_rows = [
         "gre_general": "",
         "gre_verbal": "",
         "gre_analytical_writing": "",
-        "gpa": ""
-    }
+        "gpa": "",
+    },
 ]
 
-# -------------------------------
-# FIXTURE: Flask test client
-# -------------------------------
+
+# ============================================================
+# SHARED FIXTURES
+# ============================================================
+
 @pytest.fixture
 def client():
+    """Create a Flask test client in testing mode.
+
+    :returns: Flask test client.
+    :rtype: flask.testing.FlaskClient
+    """
     app = create_app()
     app.config["TESTING"] = True
     with app.test_client() as client:
         yield client
 
-# -------------------------------
-# FIXTURE: Patch threading to run synchronously
-# -------------------------------
+
 @pytest.fixture(autouse=True)
 def patch_thread(monkeypatch):
-    """Patch threading.Thread so background jobs run immediately."""
+    """Replace ``threading.Thread`` with a synchronous stand-in.
+
+    Ensures background jobs triggered by button routes complete
+    immediately so assertions can evaluate their side-effects
+    without race conditions.
+
+    Applied automatically to every test in this module.
+
+    :param monkeypatch: Pytest monkeypatch fixture.
+    :type monkeypatch: pytest.MonkeyPatch
+    """
     class ImmediateThread:
         def __init__(self, target=None, *args, **kwargs):
             self.target = target
 
         def start(self):
             if self.target:
-                self.target()  # run synchronously
+                self.target()
 
     monkeypatch.setattr(threading, "Thread", ImmediateThread)
 
+
 # ============================================================
-# BUTTON: Pull Data (/refresh)
+# POST /refresh — Pull Data button
 # ============================================================
+
 @pytest.mark.buttons
 def test_pull_data_triggers_refresh(monkeypatch, client):
-    # Ensure clean state
-    write_state(pulling_data=False, updating_analysis=False)
+    """Verify ``POST /refresh`` calls ``refresh()`` and redirects.
 
-    called = {"refresh": False}
+    Asserts that:
 
-    def fake_refresh():
-        called["refresh"] = True
-        return {"new": 0}
+    - The response status is 302 (redirect to analysis page).
+    - The fake ``refresh()`` function was actually invoked, confirming
+      the Pull Data button wires through to the scrape pipeline.
 
-    monkeypatch.setattr("src.app.pages.refresh", fake_refresh)
-    monkeypatch.setattr("src.app.pages.get_application_stats", lambda: {"total_apps": 0})
-
-    response = client.post("/refresh")
-
-    assert response.status_code == 302
-    assert called["refresh"], "Pull Data button should call refresh()"
-
-# ============================================================
-# BUTTON: Pull Data - follow refresh and return 200
-# ============================================================
-@pytest.mark.buttons
-def test_pull_data_returns_200(monkeypatch, client):
-    write_state(pulling_data=False, updating_analysis=False)
-
-    monkeypatch.setattr("src.app.pages.refresh", lambda: None)
-    monkeypatch.setattr("src.app.pages.get_application_stats", lambda: fake_stats)
-
-    response = client.post("/refresh", follow_redirects=True)
-    assert response.status_code == 200
-
-
-# ============================================================
-# BUTTON: Pull Data - handle exception in background job
-# ============================================================
-@pytest.mark.buttons
-def test_pull_data_exception(monkeypatch, client):
-    # Ensure clean state
-    from src.app.pages import read_state
-
-    write_state(pulling_data=False, updating_analysis=False)
-
-    # Patch refresh to raise an exception
-    def fake_refresh():
-        raise RuntimeError("Simulated failure")
-
-    monkeypatch.setattr("src.app.pages.refresh", fake_refresh)
-
-    # Call the route
-    response = client.post("/refresh")
-
-    # Background thread runs synchronously due to patch_thread
-    assert response.status_code == 302  # redirect still happens
-
-    # Check that the state now contains the error message
-    state = read_state()
-    assert state["message"] is not None
-    assert "Simulated failure" in state["message"]
-    assert state["pulling_data"] is False
-    assert state["pull_complete"] is False
-
-# ============================================================
-# BUTTON: Pull Data - trigger loader logic
-# # ============================================================
-@pytest.mark.buttons
-def test_pull_data_triggers_loader(monkeypatch, client):
-    write_state(pulling_data=False, updating_analysis=False)
-
-    # Track if loader ran
-    called = {"loader": False}
-
-    # Patch refresh_gradcafe functions
-    monkeypatch.setattr(refresh_module, "get_seen_ids_from_llm_extend_file", lambda: set())
-    monkeypatch.setattr(refresh_module, "scrape_new_records", lambda seen_ids: fake_rows)
-    monkeypatch.setattr(refresh_module, "enrich_with_details", lambda rows: rows)
-    monkeypatch.setattr(refresh_module, "write_new_applicant_file", lambda rows: called.update({"loader": True}))
-
-    # Patch get_application_stats in pages.py so template renders
-    monkeypatch.setattr("src.app.pages.get_application_stats", lambda: {
-        "total_applicants": 2,
-        "fall_2026_count": 2,
-        "international_pct": 50,
-        "avg_gpa": 3.8,
-        "avg_gre": 320,
-        "avg_gre_v": 160,
-        "avg_gre_aw": 4.5,
-        "avg_gpa_us_fall_2026": 3.7,
-        "fall_2025_accept_pct": 50,
-        "avg_gpa_fall_2025_accept": 3.6,
-        "jhu_cs_masters": 1,
-        "fall_2026_cs_accept": 1,
-        "fall_2026_cs_accept_llm": 1,
-        "rejected_fall_2026_gpa_pct": 50,
-        "accepted_fall_2026_gpa_pct": 50
-    })
-
-    # Call the Flask route and follow redirects to reach final page
-    response = client.post("/refresh", follow_redirects=True)
-
-    # Check 200 status and that loader ran
-    assert response.status_code == 200
-    assert called["loader"], "The loader should have been triggered with fake rows"
-
-# ============================================================
-# BUTTON: Update Analysis (/update-analysis)
-# ============================================================
-@pytest.mark.buttons
-def test_update_analysis_triggers_update_data(monkeypatch, client):
-    # Ensure clean state
-    write_state(pulling_data=False, updating_analysis=False)
-
-    called = {"update_data": False, "sync_db": False}
-
-    def fake_update_data():
-        called["update_data"] = True
-        return 0
-
-    def fake_sync_db():
-        called["sync_db"] = True
-
-    monkeypatch.setattr("src.app.pages.update_data", fake_update_data)
-    monkeypatch.setattr("src.app.pages.sync_db_from_llm_file", fake_sync_db)
-    monkeypatch.setattr("src.app.pages.get_application_stats", lambda: {"total_apps": 0})
-
-    response = client.post("/update-analysis")
-
-    assert response.status_code == 302
-    assert called["update_data"], "Update Analysis should call update_data()"
-    assert called["sync_db"], "Update Analysis should call sync_db_from_llm_file()"
-
-# ============================================================
-# BUTTON: Update Analysis - follow refresh and return 200
-# ============================================================
-@pytest.mark.buttons
-def test_update_analysis_returns_200(monkeypatch, client):
-    write_state(pulling_data=False, updating_analysis=False)
-
-    monkeypatch.setattr("src.app.pages.update_data", lambda: None)
-    monkeypatch.setattr("src.app.pages.sync_db_from_llm_file", lambda: None)
-    monkeypatch.setattr("src.app.pages.get_application_stats", lambda: fake_stats)
-
-    response = client.post("/update-analysis", follow_redirects=True)
-    assert response.status_code == 200
-
-# ============================================================
-# BUTTON: Update Analysis - handle exception in background job
-# ============================================================
-@pytest.mark.buttons
-def test_update_analysis_exception(monkeypatch, client):
-    from src.app.pages import read_state, write_state
-
-    # Ensure clean state
-    write_state(pulling_data=False, updating_analysis=False, pull_complete=True)
-
-    # Patch update_data to raise an exception
-    def fake_update_data():
-        raise RuntimeError("Simulated analysis failure")
-
-    # Patch sync_db_from_llm_file so it won't run (optional)
-    monkeypatch.setattr("src.app.pages.sync_db_from_llm_file", lambda: None)
-    monkeypatch.setattr("src.app.pages.update_data", fake_update_data)
-
-    # Call the route
-    response = client.post("/update-analysis")
-
-    # Background thread runs synchronously because of patch_thread fixture
-    assert response.status_code == 302  # redirect still happens
-
-    # Check that the state contains the error message
-    state = read_state()
-    assert state["message"] is not None
-    assert "Simulated analysis failure" in state["message"]
-    assert state["pulling_data"] is False
-    assert state["updating_analysis"] is False
-    assert state["analysis_complete"] is False
-
-
-# ============================================================
-# Test: Pull Data runs background job fully
-# ============================================================
-@pytest.mark.buttons
-def test_pull_data_runs(client, monkeypatch):
+    :param monkeypatch: Pytest monkeypatch fixture.
+    :param client: Flask test client.
+    """
     write_state(pulling_data=False, updating_analysis=False)
 
     called = {"refresh": False}
@@ -280,78 +161,223 @@ def test_pull_data_runs(client, monkeypatch):
         return {"new": 2}
 
     monkeypatch.setattr("src.app.pages.refresh", fake_refresh)
+    monkeypatch.setattr("src.app.pages.get_application_stats", lambda: FAKE_STATS)
 
     response = client.post("/refresh")
 
     assert response.status_code == 302
-    assert called["refresh"]
+    assert called["refresh"], "Pull Data button should call refresh()"
+
+
+@pytest.mark.buttons
+def test_pull_data_returns_200(monkeypatch, client):
+    """Verify ``POST /refresh`` followed by redirect returns HTTP 200.
+
+    Follows the redirect to the analysis page and confirms the page
+    loads successfully after a pull completes.
+
+    :param monkeypatch: Pytest monkeypatch fixture.
+    :param client: Flask test client.
+    """
+    write_state(pulling_data=False, updating_analysis=False)
+    monkeypatch.setattr("src.app.pages.refresh", lambda: None)
+    monkeypatch.setattr("src.app.pages.get_application_stats", lambda: FAKE_STATS)
+
+    response = client.post("/refresh", follow_redirects=True)
+    assert response.status_code == 200
+
+
+@pytest.mark.buttons
+def test_pull_data_triggers_loader(monkeypatch, client):
+    """Verify ``POST /refresh`` runs the full scrape-and-save pipeline.
+
+    Patches the individual scraper functions inside ``refresh_gradcafe``
+    and confirms that ``write_new_applicant_file`` is called with the
+    rows returned by the fake scraper. This validates that the Pull Data
+    button triggers the loader, not just a no-op.
+
+    :param monkeypatch: Pytest monkeypatch fixture.
+    :param client: Flask test client.
+    """
+    write_state(pulling_data=False, updating_analysis=False)
+
+    called = {"loader": False}
+
+    monkeypatch.setattr(refresh_module, "get_seen_ids_from_llm_extend_file", lambda: set())
+    monkeypatch.setattr(refresh_module, "scrape_new_records", lambda seen_ids: FAKE_ROWS)
+    monkeypatch.setattr(refresh_module, "enrich_with_details", lambda rows: rows)
+    monkeypatch.setattr(
+        refresh_module, "write_new_applicant_file",
+        lambda rows: called.update({"loader": True})
+    )
+    monkeypatch.setattr("src.app.pages.get_application_stats", lambda: FAKE_STATS)
+
+    response = client.post("/refresh", follow_redirects=True)
+
+    assert response.status_code == 200
+    assert called["loader"], "Pull Data should invoke write_new_applicant_file with scraped rows"
+
+
+@pytest.mark.buttons
+def test_pull_data_exception(monkeypatch, client):
+    """Verify ``POST /refresh`` handles a scraper exception gracefully.
+
+    When ``refresh()`` raises, the route should still redirect (302) and
+    the state file should record the error message with
+    ``pulling_data=False`` and ``pull_complete=False``.
+
+    :param monkeypatch: Pytest monkeypatch fixture.
+    :param client: Flask test client.
+    """
+    write_state(pulling_data=False, updating_analysis=False)
+    monkeypatch.setattr("src.app.pages.refresh", lambda: (_ for _ in ()).throw(RuntimeError("Simulated failure")))
+
+    response = client.post("/refresh")
+
+    assert response.status_code == 302
+    state = read_state()
+    assert state["message"] is not None
+    assert "Simulated failure" in state["message"]
+    assert state["pulling_data"] is False
+    assert state["pull_complete"] is False
+
 
 # ============================================================
-# Test: Update Analysis runs background job fully
+# POST /update-analysis — Update Analysis button
 # ============================================================
+
 @pytest.mark.buttons
-def test_update_analysis_runs(client, monkeypatch):
+def test_update_analysis_triggers_update_data(monkeypatch, client):
+    """Verify ``POST /update-analysis`` calls ``update_data`` and ``sync_db_from_llm_file``.
+
+    The Update Analysis route should run LLM enrichment (``update_data``)
+    and then sync the results into the database (``sync_db_from_llm_file``).
+    Asserts both are called and the response is a 302 redirect.
+
+    :param monkeypatch: Pytest monkeypatch fixture.
+    :param client: Flask test client.
+    """
     write_state(pulling_data=False, updating_analysis=False)
 
     called = {"update_data": False, "sync_db": False}
 
-    def fake_update_data():
-        called["update_data"] = True
-        return 2
-
-    def fake_sync_db():
-        called["sync_db"] = True
-
-    monkeypatch.setattr("src.app.pages.update_data", fake_update_data)
-    monkeypatch.setattr("src.app.pages.sync_db_from_llm_file", fake_sync_db)
+    monkeypatch.setattr("src.app.pages.update_data", lambda: called.update({"update_data": True}) or 0)
+    monkeypatch.setattr("src.app.pages.sync_db_from_llm_file", lambda: called.update({"sync_db": True}))
+    monkeypatch.setattr("src.app.pages.get_application_stats", lambda: FAKE_STATS)
 
     response = client.post("/update-analysis")
 
     assert response.status_code == 302
-    assert called["update_data"]
-    assert called["sync_db"]
+    assert called["update_data"], "Update Analysis should call update_data()"
+    assert called["sync_db"], "Update Analysis should call sync_db_from_llm_file()"
+
+
+@pytest.mark.buttons
+def test_update_analysis_returns_200(monkeypatch, client):
+    """Verify ``POST /update-analysis`` followed by redirect returns HTTP 200.
+
+    Follows the redirect to the analysis page and confirms it renders
+    successfully after an update completes.
+
+    :param monkeypatch: Pytest monkeypatch fixture.
+    :param client: Flask test client.
+    """
+    write_state(pulling_data=False, updating_analysis=False)
+    monkeypatch.setattr("src.app.pages.update_data", lambda: None)
+    monkeypatch.setattr("src.app.pages.sync_db_from_llm_file", lambda: None)
+    monkeypatch.setattr("src.app.pages.get_application_stats", lambda: FAKE_STATS)
+
+    response = client.post("/update-analysis", follow_redirects=True)
+    assert response.status_code == 200
+
+
+@pytest.mark.buttons
+def test_update_analysis_exception(monkeypatch, client):
+    """Verify ``POST /update-analysis`` handles an LLM exception gracefully.
+
+    When ``update_data()`` raises, the route should still redirect (302)
+    and the state file should record the error with
+    ``updating_analysis=False`` and ``analysis_complete=False``.
+
+    :param monkeypatch: Pytest monkeypatch fixture.
+    :param client: Flask test client.
+    """
+    write_state(pulling_data=False, updating_analysis=False, pull_complete=True)
+    monkeypatch.setattr(
+        "src.app.pages.update_data",
+        lambda: (_ for _ in ()).throw(RuntimeError("Simulated analysis failure"))
+    )
+    monkeypatch.setattr("src.app.pages.sync_db_from_llm_file", lambda: None)
+
+    response = client.post("/update-analysis")
+
+    assert response.status_code == 302
+    state = read_state()
+    assert state["message"] is not None
+    assert "Simulated analysis failure" in state["message"]
+    assert state["updating_analysis"] is False
+    assert state["analysis_complete"] is False
+
 
 # ============================================================
-# Test: Busy gating for /refresh
+# BUSY-STATE GATING
 # ============================================================
+
 @pytest.mark.buttons
 def test_refresh_busy(client):
+    """Verify ``POST /refresh`` returns 409 when any job is already running.
+
+    Tests both busy conditions:
+
+    - ``pulling_data=True`` — a pull is already in progress.
+    - ``updating_analysis=True`` — an analysis update is in progress.
+
+    :param client: Flask test client.
+    """
     write_state(pulling_data=True, updating_analysis=False)
-    resp = client.post("/refresh")
-    assert resp.status_code == 409
+    assert client.post("/refresh").status_code == 409
 
     write_state(pulling_data=False, updating_analysis=True)
-    resp = client.post("/refresh")
-    assert resp.status_code == 409
+    assert client.post("/refresh").status_code == 409
 
-# ============================================================
-# Test: Busy gating for /update-analysis
-# ============================================================
+
 @pytest.mark.buttons
 def test_update_analysis_busy(client):
+    """Verify ``POST /update-analysis`` returns 409 when any job is already running.
+
+    Tests both busy conditions:
+
+    - ``pulling_data=True`` — a pull is already in progress.
+    - ``updating_analysis=True`` — an analysis update is already running.
+
+    :param client: Flask test client.
+    """
     write_state(pulling_data=True, updating_analysis=False)
-    resp = client.post("/update-analysis")
-    assert resp.status_code == 409
+    assert client.post("/update-analysis").status_code == 409
 
     write_state(pulling_data=False, updating_analysis=True)
-    resp = client.post("/update-analysis")
-    assert resp.status_code == 409
+    assert client.post("/update-analysis").status_code == 409
+
 
 # ============================================================
-# Test: STATE FILE does not exist/is not found
+# STATE FILE INFRASTRUCTURE
 # ============================================================
+
 @pytest.mark.web
 def test_read_state_file_not_found(tmp_path, monkeypatch):
-    # Create a fake file path that doesn't exist
-    fake_state_file = tmp_path / "nonexistent_state.json"
+    """Verify ``read_state`` returns safe defaults when the state file is missing.
 
-    # Patch STATE_FILE directly in pages.py
-    monkeypatch.setattr(pages, "STATE_FILE", str(fake_state_file))
+    Patches ``STATE_FILE`` to a path that does not exist and asserts that
+    ``read_state`` returns the expected default values rather than raising.
 
-    # Call read_state() — should hit FileNotFoundError and return defaults
+    :param tmp_path: Pytest-provided temporary directory.
+    :type tmp_path: pathlib.Path
+    :param monkeypatch: Pytest monkeypatch fixture.
+    """
+    monkeypatch.setattr(pages, "STATE_FILE", str(tmp_path / "nonexistent_state.json"))
+
     state = read_state()
 
-    # Check defaults
     assert state["pulling_data"] is False
     assert state["updating_analysis"] is False
     assert state["pull_complete"] is False
