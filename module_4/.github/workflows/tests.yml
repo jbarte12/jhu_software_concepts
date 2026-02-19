@@ -42,17 +42,28 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run integration tests
-        run: pytest -m integration -v
+      - name: Create database table
+        run: |
+          psql -h 127.0.0.1 -U postgres -d sm_app -c "
+          CREATE TABLE IF NOT EXISTS grad_applications (
+            p_id SERIAL PRIMARY KEY,
+            program TEXT,
+            comments TEXT,
+            date_added DATE,
+            url TEXT UNIQUE,
+            status TEXT,
+            term TEXT,
+            us_or_international TEXT,
+            gpa FLOAT,
+            gre FLOAT,
+            gre_v FLOAT,
+            gre_aw FLOAT,
+            degree TEXT,
+            llm_generated_program TEXT,
+            llm_generated_university TEXT
+          );"
+        env:
+          PGPASSWORD: abc123
 
-      - name: Run db tests
-        run: pytest -m db -v
-
-      - name: Run analysis tests
-        run: pytest -m analysis -v
-
-      - name: Run buttons tests
-        run: pytest -m buttons -v
-
-      - name: Run web tests
-        run: pytest -m web -v
+      - name: Run all tests
+        run: pytest -m "web or buttons or analysis or db or integration" -v
