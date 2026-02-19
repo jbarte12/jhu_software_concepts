@@ -20,7 +20,7 @@ import json
 # Create and return a database connection
 def create_connection(
     db_name="sm_app",          # Database name
-    db_user="postgres",        # Database user
+    db_user="postgres",        # Database userå
     db_password="abc123",      # Database password
     db_host="127.0.0.1",       # Database host (local)
     db_port="5432"             # PostgreSQL port

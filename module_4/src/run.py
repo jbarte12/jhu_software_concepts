@@ -1,12 +1,23 @@
-# Import the Flask application factory function
 from src.app import create_app
+import os
 
-# Only run this block when the file is executed directly
-if __name__ == "__main__":
-
-    # Create a new Flask application instance
+def start_app(test_mode=False):
     app = create_app()
 
-    # Start the Flask development server with debugging enabled
-    # use_reloader=False prevents the app from starting twice
-    app.run()
+    if test_mode:
+        app.config.update({
+            "TESTING": True,
+            "DEBUG": False,
+            "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
+            "WTF_CSRF_ENABLED": False,
+            "SECRET_KEY": "dev",
+        })
+
+    if not test_mode:
+        app.run(use_reloader=False)  # pragma: no cover
+
+    return app
+
+if __name__ == "__main__":
+    test_mode = os.environ.get("TEST_MAIN") == "1"
+    start_app(test_mode=test_mode)

@@ -385,24 +385,6 @@ def get_application_stats():
         """
     )
 
-    # Print summary statistics to the console for debugging
-    print(f"Total Applicants in Scraped Database: {total_applicants}")
-    print(f"Fall 2026 Applicants: {fall_2026_count}")
-    print(f"Percent of International Applicants: {international_pct}")
-    print(f"Average GPA: {avg_gpa}")
-    print(f"Average GRE: {avg_gre}")
-    print(f"Average GRE Verbal: {avg_gre_v}")
-    print(f"Average GRE Analytical Writing: {avg_gre_aw}")
-    print(f"Average GPA American Applicants, Fall 2026: {avg_gpa_us_fall_2026}")
-    print(f"Acceptance Rate, Fall 2025: {fall_2025_accept_pct}")
-    print(f"Average Acceptance GPA, Fall 2026: {avg_gpa_fall_2025_accept}")
-    print(f"JHU M.S. Computer Science Applicants: {jhu_cs_masters}")
-    print(f"2026 Acceptances, Georgetown, MIT, Stanford, CMU (Raw):: {fall_2026_cs_accept}")
-    print(f"2026 Acceptances, Georgetown, MIT, Stanford, CMU (LLM)::"
-          f" {fall_2026_cs_accept_llm}")
-    print(f"Percent of GPAs included with Rejection, Fall 2026: {rejected_fall_2026_gpa_pct}")
-    print(f"Percent of GPAs included with Acceptance, Fall 2026: {accepted_fall_2026_gpa_pct}")
-
     # Close the database connection
     connection.close()
 
@@ -424,8 +406,3 @@ def get_application_stats():
         "rejected_fall_2026_gpa_pct": rejected_fall_2026_gpa_pct,
         "accepted_fall_2026_gpa_pct": accepted_fall_2026_gpa_pct
     }
-
-
-# Run the analytics function directly when the file is executed
-if __name__ == "__main__":
-    get_application_stats()

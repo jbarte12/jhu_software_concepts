@@ -62,7 +62,7 @@ def scrape_new_records(seen_ids):
     consecutive_seen = 0
 
     # Stop scraping if this many seen records are found in a row
-    SEEN_LIMIT = 3
+    SEEN_LIMIT = 1
 
     # Loop until no more pages or stop condition is met
     while True:

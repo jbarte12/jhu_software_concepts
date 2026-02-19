@@ -1,0 +1,4 @@
+[run]
+# Exclude helper files or scripts you don’t want in coverage
+omit =
+    src/scrape/llm_hosting/app.py

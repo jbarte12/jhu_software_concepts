@@ -2,7 +2,7 @@ import pytest
 from types import SimpleNamespace
 from bs4 import BeautifulSoup
 
-# ------------------------------
+## ------------------------------
 # Fake stats with all required fields
 # ------------------------------
 fake_stats = SimpleNamespace(
@@ -26,7 +26,7 @@ fake_stats = SimpleNamespace(
 # ------------------------------
 # Fake HTML renderer
 # ------------------------------
-def fake_gradcafe_html(stats=fake_stats, pulling_data=False, pull_complete=False, message=None):
+def fake_gradcafe_html(stats=fake_stats):
     return f"""
     <html>
     <body>
@@ -50,42 +50,60 @@ def fake_gradcafe_html(stats=fake_stats, pulling_data=False, pull_complete=False
         <!-- Buttons -->
         <form><button class="btn-refresh">Pull Data</button></form>
         <form><button class="btn-update">Update Analysis</button></form>
-
-        <!-- Add at least one 'Answer:' label for legacy tests -->
-        <p><strong>Answer:</strong> Test value</p>
     </body>
     </html>
     """
 
-# ------------------------------
-# Helper to parse HTML
-# ------------------------------
 def parse_html(stats=fake_stats):
     html = fake_gradcafe_html(stats)
     return BeautifulSoup(html, "html.parser")
 
 # ------------------------------
+# Test labels vs. answers
+# ------------------------------
+@pytest.mark.analysis
+def test_labels_and_answers():
+    soup = parse_html(fake_stats)
+
+    # Map of label text -> expected value
+    expected = {
+        "Fall 2026 Applicants:": str(fake_stats.fall_2026_count),
+        "International Applicants (%):": f"{fake_stats.international_pct:.2f}%",
+        "Average GPA:": f"{fake_stats.avg_gpa:.2f}",
+        "Average GRE:": f"{fake_stats.avg_gre:.2f}",
+        "Average GRE Verbal:": f"{fake_stats.avg_gre_v:.2f}",
+        "Average GRE AW:": f"{fake_stats.avg_gre_aw:.2f}",
+        "Average GPA (US, Fall 2026):": f"{fake_stats.avg_gpa_us_fall_2026:.2f}",
+        "Fall 2025 Acceptance Rate (%):": f"{fake_stats.fall_2025_accept_pct:.2f}%",
+        "Total Applicants in Pipeline:": str(fake_stats.total_applicants),
+        "Average GPA of Accepted Fall 2025 Applicants:": f"{fake_stats.avg_gpa_fall_2025_accept:.2f}",
+        "JHU CS Master’s Applicants:": str(fake_stats.jhu_cs_masters),
+        "2026 Acceptances, Georgetown, MIT, Stanford, CMU (Raw):": str(fake_stats.fall_2026_cs_accept),
+        "2026 Acceptances, Georgetown, MIT, Stanford, CMU (LLM):": str(fake_stats.fall_2026_cs_accept_llm),
+        "Fall 2026 Rejected Applicants Reporting GPA (%):": f"{fake_stats.rejected_fall_2026_gpa_pct:.2f}%",
+        "Fall 2026 Accepted Applicants Reporting GPA (%):": f"{fake_stats.accepted_fall_2026_gpa_pct:.2f}%"
+    }
+
+    for label_text, expected_value in expected.items():
+        label = soup.find("strong", string=label_text)
+        assert label is not None, f"Label '{label_text}' not found"
+        value = label.find_next("em").get_text()
+        assert value == expected_value, f"Expected '{expected_value}' for '{label_text}', got '{value}'"
+
+# ------------------------------
 # Test buttons exist
 # ------------------------------
 @pytest.mark.analysis
-def test_analysis_page_buttons_and_labels():
+def test_buttons_exist():
     soup = parse_html(fake_stats)
-    text = soup.get_text()
-
-    # Buttons
-    pull_button = soup.find("button", class_="btn-refresh")
-    update_button = soup.find("button", class_="btn-update")
-    assert pull_button is not None, "Pull Data button not found"
-    assert update_button is not None, "Update Analysis button not found"
-
-    # At least one "Answer:" label
-    assert "Answer:" in text, "No 'Answer:' label found in page"
+    assert soup.find("button", class_="btn-refresh") is not None
+    assert soup.find("button", class_="btn-update") is not None
 
 # ------------------------------
-# Test percentages rounded to 2 decimals
+# Test percentages rounded to 2 decimals (label/value check)
 # ------------------------------
 @pytest.mark.analysis
-def test_percentages_two_decimals():
+def test_percentages_two_decimals_labelled():
     fake_stats_decimal = SimpleNamespace(
         total_applicants=1000,
         fall_2026_count=500,
@@ -105,11 +123,17 @@ def test_percentages_two_decimals():
     )
 
     soup = parse_html(fake_stats_decimal)
-    text = soup.get_text()
 
-    # Check percentages rounded to 2 decimals
-    assert "45.68" in text
-    assert "78.90" in text
-    assert "12.35" in text
-    assert "56.79" in text
+    expected_percentages = {
+        "International Applicants (%):": f"{fake_stats_decimal.international_pct:.2f}%",
+        "Fall 2025 Acceptance Rate (%):": f"{fake_stats_decimal.fall_2025_accept_pct:.2f}%",
+        "Fall 2026 Rejected Applicants Reporting GPA (%):": f"{fake_stats_decimal.rejected_fall_2026_gpa_pct:.2f}%",
+        "Fall 2026 Accepted Applicants Reporting GPA (%):": f"{fake_stats_decimal.accepted_fall_2026_gpa_pct:.2f}%"
+    }
+
+    for label_text, expected_value in expected_percentages.items():
+        label = soup.find("strong", string=label_text)
+        assert label is not None, f"Label '{label_text}' not found"
+        value = label.find_next("em").get_text()
+        assert value == expected_value, f"Expected '{expected_value}' for '{label_text}', got '{value}'"
 
