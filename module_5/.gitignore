@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 .coverage
 src/src_files/
+models/*.gguf
+src/models/.cache/
