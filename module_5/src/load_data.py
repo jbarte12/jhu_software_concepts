@@ -1,13 +1,10 @@
 # load_data.py
 
-# PostgreSQL database adapter for Python
-import psycopg2
+# PostgreSQL database adapter for Python (psycopg3)
+import psycopg
 
 # Exception class for database connection errors
-from psycopg2 import OperationalError
-
-# Helper for efficiently inserting many rows at once
-from psycopg2.extras import execute_values
+from psycopg import OperationalError
 
 # Used to convert string dates into Python date objects
 from datetime import datetime
@@ -20,15 +17,15 @@ import json
 # Create and return a database connection
 def create_connection(
     db_name="sm_app",          # Database name
-    db_user="postgres",        # Database userå
+    db_user="postgres",        # Database user
     db_password="abc123",      # Database password
     db_host="127.0.0.1",       # Database host (local)
     db_port="5432"             # PostgreSQL port
 ):
     try:
         # Attempt to open a connection to PostgreSQL
-        return psycopg2.connect(
-            database=db_name,
+        return psycopg.connect(
+            dbname=db_name,        # Note: psycopg3 uses 'dbname' not 'database'
             user=db_user,
             password=db_password,
             host=db_host,
@@ -74,7 +71,7 @@ def rebuild_from_llm_file(path=LLM_OUTPUT_FILE):
           gre FLOAT,
           gre_v FLOAT,
           gre_aw FLOAT,
-          degree TEXT,å
+          degree TEXT,
           llm_generated_program TEXT,
           llm_generated_university TEXT
         );
@@ -144,14 +141,14 @@ def rebuild_from_llm_file(path=LLM_OUTPUT_FILE):
             )
 
     # Bulk insert all rows into the database
-    execute_values(
-        cur,
+    # psycopg3 uses executemany with explicit %s placeholders per column
+    cur.executemany(
         """
         INSERT INTO grad_applications (
             program, comments, date_added, url, status, term,
             us_or_international, gpa, gre, gre_v, gre_aw,
             degree, llm_generated_program, llm_generated_university
-        ) VALUES %s
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (url) DO NOTHING;
         """,
         rows
@@ -211,14 +208,13 @@ def sync_db_from_llm_file(path=LLM_OUTPUT_FILE):
             )
 
     # Insert only new rows (based on unique URL)
-    execute_values(
-        cur,
+    cur.executemany(
         """
         INSERT INTO grad_applications (
             program, comments, date_added, url, status, term,
             us_or_international, gpa, gre, gre_v, gre_aw,
             degree, llm_generated_program, llm_generated_university
-        ) VALUES %s
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (url) DO NOTHING;
         """,
         rows

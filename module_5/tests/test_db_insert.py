@@ -19,6 +19,11 @@ Covers three spec requirements:
 
 Based on :mod:`src.load_data` and :mod:`src.query_data`.
 All tests are marked ``db`` and run fully offline.
+
+.. note::
+    This module uses ``psycopg`` (psycopg3). The ``execute_values`` helper
+    from psycopg2 is no longer used; bulk inserts are now performed via
+    ``cursor.executemany()``, which is patched directly on :class:`FakeCursor`.
 """
 
 import json
@@ -34,11 +39,11 @@ from src.query_data import get_application_stats
 
 @pytest.mark.db
 class FakeCursor:
-    """Fake psycopg2 cursor that records executed queries and captured rows.
+    """Fake psycopg3 cursor that records executed queries and captured rows.
 
-    Supports ``execute``, ``fetchone`` (with query-keyed result routing),
-    and an ``inserted_rows`` list populated by fake ``execute_values``
-    helpers.
+    Supports ``execute``, ``executemany``, ``fetchone`` (with query-keyed
+    result routing), and an ``inserted_rows`` list populated by
+    ``executemany`` calls.
 
     :param query_results: Optional mapping of SQL keyword fragment to the
         tuple that ``fetchone`` should return when that fragment appears
@@ -59,6 +64,20 @@ class FakeCursor:
         :param vars: Optional query parameters (unused).
         """
         self.executed_queries.append(query)
+
+    def executemany(self, sql, rows):
+        """Simulate a bulk insert by extending ``inserted_rows``.
+
+        Replaces the psycopg2 ``execute_values`` pattern. Called by
+        :func:`src.load_data.rebuild_from_llm_file` and
+        :func:`src.load_data.sync_db_from_llm_file`.
+
+        :param sql: SQL query string (unused in fake).
+        :type sql: str
+        :param rows: Row tuples to capture.
+        :type rows: list[tuple]
+        """
+        self.inserted_rows.extend(rows)
 
     def fetchone(self):
         """Return a query-specific result tuple based on the last executed query.
@@ -83,7 +102,7 @@ class FakeCursor:
 
 
 class FakeConnection:
-    """Fake psycopg2 connection for fully offline database tests.
+    """Fake psycopg3 connection for fully offline database tests.
 
     :param query_results: Passed through to the internal :class:`FakeCursor`.
     :type query_results: dict, optional
@@ -116,9 +135,13 @@ class FakeConnection:
         """Mark the connection as closed."""
         self.closed = True
 
+
 @pytest.mark.db
-def fake_execute_values(cur, sql, rows):
-    """Simulate ``psycopg2.extras.execute_values`` by appending rows to the cursor.
+def fake_executemany(cur, sql, rows):
+    """Simulate ``cursor.executemany`` by appending rows to the cursor.
+
+    Used as a drop-in for simple insert tests that do not need
+    uniqueness enforcement.
 
     :param cur: Fake cursor instance.
     :type cur: FakeCursor
@@ -129,9 +152,10 @@ def fake_execute_values(cur, sql, rows):
     """
     cur.inserted_rows.extend(rows)
 
+
 @pytest.mark.db
-def fake_execute_values_unique(cur, sql, rows):
-    """Simulate ``execute_values`` with ``ON CONFLICT (url) DO NOTHING`` semantics.
+def fake_executemany_unique(cur, sql, rows):
+    """Simulate ``cursor.executemany`` with ``ON CONFLICT (url) DO NOTHING`` semantics.
 
     Deduplicates on the URL field (index 3), converts empty strings to
     ``None``, and only appends genuinely new rows.
@@ -217,8 +241,12 @@ def test_rebuild_from_llm_file_inserts_rows(monkeypatch, tmp_path):
     """Verify ``rebuild_from_llm_file`` inserts one row per JSON line.
 
     Writes two realistic LLM NDJSON records to a temp file and asserts
-    that both are captured by the fake ``execute_values``, confirming
+    that both are captured by the fake ``executemany``, confirming
     the "after pull: rows exist" requirement.
+
+    ``FakeCursor.executemany`` is patched directly on the cursor instance
+    after the fake connection is created, since psycopg3 no longer uses
+    the standalone ``execute_values`` helper from psycopg2.
 
     :param monkeypatch: Pytest monkeypatch fixture.
     :param tmp_path: Pytest-provided temporary directory.
@@ -267,8 +295,14 @@ def test_rebuild_from_llm_file_inserts_rows(monkeypatch, tmp_path):
     )
 
     fake_conn = FakeConnection()
+
+    # Patch executemany directly on the cursor to capture inserted rows.
+    # psycopg3 uses cursor.executemany() instead of the psycopg2 execute_values helper.
+    fake_conn.cursor_obj.executemany = lambda sql, rows: fake_executemany(
+        fake_conn.cursor_obj, sql, rows
+    )
+
     monkeypatch.setattr("src.load_data.create_connection", lambda *a, **kw: fake_conn)
-    monkeypatch.setattr("src.load_data.execute_values", fake_execute_values)
 
     rebuild_from_llm_file(path=str(llm_file))
 
@@ -301,6 +335,10 @@ def test_rebuild_from_llm_file_uniqueness(monkeypatch, tmp_path):
     Writes three NDJSON records where two share the same ``url_link``,
     then asserts only two unique rows were inserted — matching the
     ``ON CONFLICT (url) DO NOTHING`` behaviour in production.
+
+    ``FakeCursor.executemany`` is replaced with :func:`fake_executemany_unique`
+    directly on the cursor instance to enforce URL-based deduplication
+    without a real database.
 
     :param monkeypatch: Pytest monkeypatch fixture.
     :param tmp_path: Pytest-provided temporary directory.
@@ -367,8 +405,14 @@ def test_rebuild_from_llm_file_uniqueness(monkeypatch, tmp_path):
     )
 
     fake_conn = FakeConnection()
+
+    # Override executemany with the uniqueness-enforcing variant to simulate
+    # ON CONFLICT (url) DO NOTHING without a real database.
+    fake_conn.cursor_obj.executemany = lambda sql, rows: fake_executemany_unique(
+        fake_conn.cursor_obj, sql, rows
+    )
+
     monkeypatch.setattr("src.load_data.create_connection", lambda *a, **kw: fake_conn)
-    monkeypatch.setattr("src.load_data.execute_values", fake_execute_values_unique)
 
     rebuild_from_llm_file(path=str(llm_file))
 

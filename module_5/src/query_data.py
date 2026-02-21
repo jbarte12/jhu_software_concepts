@@ -1,4 +1,7 @@
+# query_data.py
+
 # Import the database connection helper function from load_data.py
+# load_data.py now uses psycopg (psycopg3) instead of psycopg2
 from .load_data import create_connection
 
 

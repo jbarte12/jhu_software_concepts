@@ -283,7 +283,7 @@ def test_update_analysis_returns_200(monkeypatch, client):
     :param client: Flask test client.
     """
     write_state(pulling_data=False, updating_analysis=False)
-    monkeypatch.setattr("src.app.pages.update_data", lambda: None)
+    monkeypatch.setattr("src.app.pages.update_data", lambda: 0)
     monkeypatch.setattr("src.app.pages.sync_db_from_llm_file", lambda: None)
     monkeypatch.setattr("src.app.pages.get_application_stats", lambda: FAKE_STATS)
 

@@ -1,5 +1,16 @@
-# Import Flask helpers for routing, rendering templates, and redirects
-from flask import Blueprint, render_template, redirect, url_for
+"""
+Flask Blueprint for GradCafe stats pages and asynchronous data operations.
+
+This module defines routes for displaying GradCafe application statistics,
+initiating data pulls, and updating analysis asynchronously using background
+threads. It also provides helper functions to read and write the application's
+state to disk.
+
+Routes:
+- "/" or "/analysis": Main stats page.
+- "/refresh" [POST]: Trigger a data pull in the background.
+- "/update-analysis" [POST]: Trigger analysis update in the background.
+"""
 
 # Import threading so long-running jobs don’t block the web app
 import threading
@@ -7,13 +18,17 @@ import threading
 # Import json to read/write application state to a file
 import json
 
+# Import os to handle file paths and ensure directories exist
+import os
+
+# Import Flask helpers for routing, rendering templates, and redirects
+from flask import Blueprint, render_template, redirect, url_for
+
 # Import functions for querying, refreshing, updating, and syncing data
 from ..query_data import get_application_stats
 from ..refresh_gradcafe import refresh
 from ..update_data import update_data
 from ..load_data import sync_db_from_llm_file
-
-import os
 from ..paths import STATE_FILE
 
 # Create a Flask Blueprint for page routes
@@ -96,7 +111,7 @@ def refresh_gradcafe():
             # Mark pull complete
             write_state(pulling_data=False, updating_analysis=False,
                         pull_complete=True, analysis_complete=False, message=None)
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             write_state(pulling_data=False, updating_analysis=False,
                         pull_complete=False, analysis_complete=False,
                         message=f"Pull failed: {e}")
@@ -125,16 +140,18 @@ def update_analysis():
             sync_db_from_llm_file()
 
             # Build completion message
-            msg = f"Analysis updated with {processed} new applicants." if processed > 0 else "No new applicants to analyze."
+            msg = f"Analysis updated with {processed} new applicants." if processed > 0 \
+                else "No new applicants to analyze."
 
             # Reset flags and mark analysis complete
             write_state(pulling_data=False, updating_analysis=False,
                         pull_complete=state["pull_complete"],
                         analysis_complete=True, message=msg)
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             write_state(pulling_data=False, updating_analysis=False,
                         pull_complete=state["pull_complete"],
-                        analysis_complete=False, message=f"Analysis failed: {e}")
+                        analysis_complete=False,
+                        message=f"Analysis failed: {e}")
 
     threading.Thread(target=background_job, daemon=True).start()
     return redirect(url_for("pages.grad_cafe"))
