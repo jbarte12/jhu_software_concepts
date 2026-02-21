@@ -1,0 +1,69 @@
+name: Run Tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: module_4
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: sm_app
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: abc123
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create database table
+        run: |
+          psql -h 127.0.0.1 -U postgres -d sm_app -c "
+          CREATE TABLE IF NOT EXISTS grad_applications (
+            p_id SERIAL PRIMARY KEY,
+            program TEXT,
+            comments TEXT,
+            date_added DATE,
+            url TEXT UNIQUE,
+            status TEXT,
+            term TEXT,
+            us_or_international TEXT,
+            gpa FLOAT,
+            gre FLOAT,
+            gre_v FLOAT,
+            gre_aw FLOAT,
+            degree TEXT,
+            llm_generated_program TEXT,
+            llm_generated_university TEXT
+          );"
+        env:
+          PGPASSWORD: abc123
+
+      - name: Run all tests
+        run: pytest -m "web or buttons or analysis or db or integration" -v
