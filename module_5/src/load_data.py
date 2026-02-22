@@ -235,8 +235,9 @@ def _execute_upsert(conn: Connection, rows: list, rebuild: bool) -> None:
     """
     with conn.cursor() as cur:
 
-        # Create the grad_applications table if it does not already exist
-        cur.execute("""
+        # Create the grad_applications table if it does not already exist.
+        # SQL object constructed separately from the execute call.
+        create_stmt = sql.SQL("""
             CREATE TABLE IF NOT EXISTS grad_applications (
               p_id SERIAL PRIMARY KEY,
               program TEXT,
@@ -255,26 +256,28 @@ def _execute_upsert(conn: Connection, rows: list, rebuild: bool) -> None:
               llm_generated_university TEXT
             );
         """)
+        cur.execute(create_stmt)
 
         if rebuild:
-            # Delete all existing rows and reset the primary key counter
-            cur.execute("TRUNCATE grad_applications RESTART IDENTITY;")
+            # Delete all existing rows and reset the primary key counter.
+            # SQL object constructed separately from the execute call.
+            truncate_stmt = sql.SQL("TRUNCATE grad_applications RESTART IDENTITY;")
+            cur.execute(truncate_stmt)
 
         # Bulk insert all rows into the database.
-        # psycopg3 uses executemany with explicit %s placeholders per column.
+        # SQL object constructed separately from the executemany call.
+        # psycopg3 uses %s placeholders for data values (never string interpolation).
         # ON CONFLICT (url) DO NOTHING silently skips duplicates for both
         # the rebuild path (which truncates first) and the sync path.
-        cur.executemany(
-            """
+        insert_stmt = sql.SQL("""
             INSERT INTO grad_applications (
                 program, comments, date_added, url, status, term,
                 us_or_international, gpa, gre, gre_v, gre_aw,
                 degree, llm_generated_program, llm_generated_university
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (url) DO NOTHING;
-            """,
-            rows,
-        )
+        """)
+        cur.executemany(insert_stmt, rows)
 
 
 def rebuild_from_llm_file(path=LLM_OUTPUT_FILE):

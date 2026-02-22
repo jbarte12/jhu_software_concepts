@@ -94,7 +94,10 @@ class FakeCursor:
         :returns: Result tuple for the last executed query.
         :rtype: tuple
         """
-        last_query = self.executed_queries[-1] if self.executed_queries else ""
+        # Convert to string so key-lookup works whether the stored query is
+        # a plain str or a psycopg sql.SQL object (which is not iterable).
+        raw = self.executed_queries[-1] if self.executed_queries else ""
+        last_query = raw.as_string(None) if hasattr(raw, "as_string") else str(raw)
         for key, value in self.query_results.items():
             if key in last_query:
                 if isinstance(value, tuple):
@@ -105,6 +108,23 @@ class FakeCursor:
                     value = None
                 return value
         return (None, None, None, None)
+
+    def fetchmany(self, size=1):
+        """Delegate to ``fetchone`` and wrap the result in a list.
+
+        ``fetch_value`` and ``fetch_row`` in ``query_data`` now call
+        ``fetchmany(clamped)`` instead of ``fetchone()``. This shim
+        preserves all existing query-routing logic in ``fetchone`` while
+        satisfying the new interface.
+
+        :param size: Number of rows to return (ignored; always returns 0 or 1).
+        :type size: int
+        :returns: A one-element list containing the ``fetchone`` result,
+            or an empty list if ``fetchone`` returns ``None``.
+        :rtype: list[tuple]
+        """
+        result = self.fetchone()
+        return [result] if result is not None else []
 
     def __enter__(self):
         """Support ``with conn.cursor() as cur:`` usage.
@@ -656,7 +676,10 @@ class FakeCursor:
         :returns: Result tuple for the last executed query.
         :rtype: tuple
         """
-        last_query = self.executed_queries[-1] if self.executed_queries else ""
+        # Convert to string so key-lookup works whether the stored query is
+        # a plain str or a psycopg sql.SQL object (which is not iterable).
+        raw = self.executed_queries[-1] if self.executed_queries else ""
+        last_query = raw.as_string(None) if hasattr(raw, "as_string") else str(raw)
         for key, value in self.query_results.items():
             if key in last_query:
                 if isinstance(value, tuple):
@@ -667,6 +690,23 @@ class FakeCursor:
                     value = None
                 return value
         return (None, None, None, None)
+
+    def fetchmany(self, size=1):
+        """Delegate to ``fetchone`` and wrap the result in a list.
+
+        ``fetch_value`` and ``fetch_row`` in ``query_data`` now call
+        ``fetchmany(clamped)`` instead of ``fetchone()``. This shim
+        preserves all existing query-routing logic in ``fetchone`` while
+        satisfying the new interface.
+
+        :param size: Number of rows to return (ignored; always returns 0 or 1).
+        :type size: int
+        :returns: A one-element list containing the ``fetchone`` result,
+            or an empty list if ``fetchone`` returns ``None``.
+        :rtype: list[tuple]
+        """
+        result = self.fetchone()
+        return [result] if result is not None else []
 
     def __enter__(self):
         """Support ``with conn.cursor() as cur:`` usage.

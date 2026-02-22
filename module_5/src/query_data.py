@@ -9,47 +9,72 @@ to retrieve applicant statistics.
 # Connection imported for type annotation so Pylint can resolve member access
 from psycopg import Connection
 
+# sql module for safe SQL composition — separates construction from execution
+from psycopg import sql
+
 # Import the database connection helper function from load_data.py
 # load_data.py uses psycopg (psycopg3) instead of psycopg2
 from .load_data import create_connection
 
+# Maximum number of rows any single query in this module may return.
+# Every query includes an explicit LIMIT 1 in its SQL body; this constant
+# is enforced by fetch_value and fetch_row as an additional ceiling so no
+# caller can accidentally bypass the row limit policy.
+MAX_QUERY_LIMIT = 1
 
 
-def fetch_value(connection, query):
+def fetch_value(connection, query: sql.Composable, limit: int = MAX_QUERY_LIMIT):
     """Run a SQL query and return a single scalar value.
 
     Creates a cursor, executes the query, and returns the first column
     of the first result row. Returns ``None`` if the query produces no rows.
 
+    The ``limit`` parameter is clamped to ``[1, MAX_QUERY_LIMIT]`` before
+    fetching. All queries in this module already embed ``LIMIT 1`` in their
+    SQL body; this enforces the policy at the Python layer as well so no
+    caller can accidentally retrieve unbounded rows.
+
     :param connection: An open psycopg3 database connection.
     :type connection: psycopg.Connection
-    :param query: SQL query expected to return a single value.
-    :type query: str
+    :param query: SQL statement to execute, as a ``sql.Composable`` object.
+    :type query: psycopg.sql.Composable
+    :param limit: Maximum rows to fetch; clamped to ``[1, MAX_QUERY_LIMIT]``.
+    :type limit: int
     :returns: The scalar result, or ``None`` if no rows were returned.
     :rtype: any
     """
+    clamped = max(1, min(limit, MAX_QUERY_LIMIT))
     cursor = connection.cursor()
     cursor.execute(query)
-    result = cursor.fetchone()
-    return result[0] if result is not None else None
+    result = cursor.fetchmany(clamped)
+    return result[0][0] if result else None
 
 
-def fetch_row(connection, query):
+def fetch_row(connection, query: sql.Composable, limit: int = MAX_QUERY_LIMIT):
     """Run a SQL query and return the first result row as a tuple.
 
     Creates a cursor, executes the query, and returns the entire first
     row. Returns ``None`` if the query produces no rows.
 
+    The ``limit`` parameter is clamped to ``[1, MAX_QUERY_LIMIT]`` before
+    fetching. All queries in this module already embed ``LIMIT 1`` in their
+    SQL body; this enforces the policy at the Python layer as well so no
+    caller can accidentally retrieve unbounded rows.
+
     :param connection: An open psycopg3 database connection.
     :type connection: psycopg.Connection
-    :param query: SQL query expected to return one or more columns.
-    :type query: str
+    :param query: SQL statement to execute, as a ``sql.Composable`` object.
+    :type query: psycopg.sql.Composable
+    :param limit: Maximum rows to fetch; clamped to ``[1, MAX_QUERY_LIMIT]``.
+    :type limit: int
     :returns: The first result row, or ``None`` if no rows were returned.
     :rtype: tuple or None
     """
+    clamped = max(1, min(limit, MAX_QUERY_LIMIT))
     cursor = connection.cursor()
     cursor.execute(query)
-    return cursor.fetchone()
+    result = cursor.fetchmany(clamped)
+    return result[0] if result else None
 
 
 def _fetch_international_pct(connection: Connection) -> float:
@@ -65,15 +90,16 @@ def _fetch_international_pct(connection: Connection) -> float:
     """
     total_count = fetch_value(
         connection,
-        "SELECT COUNT(*) FROM grad_applications;"
+        sql.SQL("SELECT COUNT(*) FROM grad_applications LIMIT 1;")
     )
     international_count = fetch_value(
         connection,
-        """
+        sql.SQL("""
         SELECT COUNT(*)
         FROM grad_applications
-        WHERE LOWER(us_or_international) = 'international';
-        """
+        WHERE LOWER(us_or_international) = 'international'
+        LIMIT 1;
+        """)
     )
     return (
         round((international_count / total_count) * 100, 2)
@@ -96,16 +122,17 @@ def _fetch_fall_2025_accept_pct(connection: Connection) -> float:
     """
     fall_2025_total = fetch_value(
         connection,
-        "SELECT COUNT(*) FROM grad_applications WHERE term = 'Fall 2025';"
+        sql.SQL("SELECT COUNT(*) FROM grad_applications WHERE term = 'Fall 2025' LIMIT 1;")
     )
     fall_2025_accept = fetch_value(
         connection,
-        """
+        sql.SQL("""
         SELECT COUNT(*)
         FROM grad_applications
         WHERE term = 'Fall 2025'
-          AND LOWER(status) LIKE 'accepted%';
-        """
+          AND LOWER(status) LIKE 'accepted%'
+        LIMIT 1;
+        """)
     )
     return (
         round((fall_2025_accept / fall_2025_total) * 100, 2)
@@ -128,7 +155,7 @@ def _fetch_fall_2026_gpa_pcts(connection: Connection) -> tuple:
     # Percentage of rejected Fall 2026 applicants who reported a GPA
     rejected = fetch_value(
         connection,
-        """
+        sql.SQL("""
         SELECT
             COALESCE(
                 ROUND(
@@ -141,13 +168,14 @@ def _fetch_fall_2026_gpa_pcts(connection: Connection) -> tuple:
             )
         FROM grad_applications
         WHERE term = 'Fall 2026'
-          AND LOWER(status) LIKE 'rejected:%';
-        """
+          AND LOWER(status) LIKE 'rejected:%'
+        LIMIT 1;
+        """)
     )
     # Percentage of accepted Fall 2026 applicants who reported a GPA
     accepted = fetch_value(
         connection,
-        """
+        sql.SQL("""
         SELECT
             COALESCE(
                 ROUND(
@@ -160,8 +188,9 @@ def _fetch_fall_2026_gpa_pcts(connection: Connection) -> tuple:
             )
         FROM grad_applications
         WHERE term = 'Fall 2026'
-          AND LOWER(status) LIKE 'accepted:%';
-        """
+          AND LOWER(status) LIKE 'accepted:%'
+        LIMIT 1;
+        """)
     )
     return rejected, accepted
 
@@ -181,7 +210,7 @@ def _fetch_fall_2026_cs_accepts(connection: Connection) -> tuple:
     # Count Fall 2026 PhD CS acceptances at target schools (RAW fields)
     raw_accept = fetch_value(
         connection,
-        """
+        sql.SQL("""
         SELECT COUNT(*)
         FROM grad_applications
         WHERE term = 'Fall 2026'
@@ -238,14 +267,15 @@ def _fetch_fall_2026_cs_accepts(connection: Connection) -> tuple:
              OR LOWER(program) LIKE '%carnegie mellon univrsity%'
              OR LOWER(program) LIKE '%carnegie mellon univ%'
              OR LOWER(program) LIKE '%cmu%'
-          );
-        """
+          )
+        LIMIT 1;
+        """)
     )
 
     # Count Fall 2026 PhD CS acceptances using LLM-generated fields
     llm_accept = fetch_value(
         connection,
-        """
+        sql.SQL("""
         SELECT COUNT(*)
         FROM grad_applications
         WHERE term = 'Fall 2026'
@@ -302,8 +332,9 @@ def _fetch_fall_2026_cs_accepts(connection: Connection) -> tuple:
              OR LOWER(llm_generated_university) LIKE '%carnegie mellon univrsity%'
              OR LOWER(llm_generated_university) LIKE '%carnegie mellon univ%'
              OR LOWER(llm_generated_university) LIKE '%cmu%'
-          );
-        """
+          )
+        LIMIT 1;
+        """)
     )
 
     return raw_accept, llm_accept
@@ -328,10 +359,11 @@ def _fetch_averages(connection: Connection) -> dict:
     # rows, which would cause a TypeError on tuple unpacking.
     averages_row = fetch_row(
         connection,
-        """
+        sql.SQL("""
         SELECT AVG(gpa), AVG(gre), AVG(gre_v), AVG(gre_aw)
-        FROM grad_applications;
-        """
+        FROM grad_applications
+        LIMIT 1;
+        """)
     )
     avg_gpa, avg_gre, avg_gre_v, avg_gre_aw = (
         averages_row if averages_row is not None else (None, None, None, None)
@@ -340,25 +372,27 @@ def _fetch_averages(connection: Connection) -> dict:
     # Query average GPA for US applicants applying for Fall 2026
     avg_gpa_us_fall_2026 = fetch_value(
         connection,
-        """
+        sql.SQL("""
         SELECT AVG(gpa)
         FROM grad_applications
         WHERE term = 'Fall 2026'
           AND LOWER(us_or_international) = 'us'
-          AND gpa IS NOT NULL;
-        """
+          AND gpa IS NOT NULL
+        LIMIT 1;
+        """)
     )
 
     # Query average GPA of accepted Fall 2025 applicants
     avg_gpa_fall_2025_accept = fetch_value(
         connection,
-        """
+        sql.SQL("""
         SELECT AVG(gpa)
         FROM grad_applications
         WHERE term = 'Fall 2025'
           AND LOWER(status) LIKE 'accepted%'
-          AND gpa IS NOT NULL;
-        """
+          AND gpa IS NOT NULL
+        LIMIT 1;
+        """)
     )
 
     return {
@@ -391,19 +425,19 @@ def _fetch_stats(connection: Connection) -> dict:
     # Query total number of applicants in the database
     total_applicants = fetch_value(
         connection,
-        "SELECT COUNT(*) FROM grad_applications;"
+        sql.SQL("SELECT COUNT(*) FROM grad_applications LIMIT 1;")
     )
 
     # Query total number of Fall 2026 applications
     fall_2026_count = fetch_value(
         connection,
-        "SELECT COUNT(*) FROM grad_applications WHERE term = 'Fall 2026';"
+        sql.SQL("SELECT COUNT(*) FROM grad_applications WHERE term = 'Fall 2026' LIMIT 1;")
     )
 
     # Query number of JHU Computer Science master's applications
     jhu_cs_masters = fetch_value(
         connection,
-        """
+        sql.SQL("""
         SELECT COUNT(*)
         FROM grad_applications
         WHERE LOWER(degree) = 'masters'
@@ -432,8 +466,9 @@ def _fetch_stats(connection: Connection) -> dict:
              OR LOWER(program) LIKE '%jonhs hopkins%'
              OR LOWER(program) LIKE '%johns hopkinss%'
              OR LOWER(program) LIKE '%john hopkinss%'
-          );
-        """
+          )
+        LIMIT 1;
+        """)
     )
 
     # Delegate grouped calculations to private helpers

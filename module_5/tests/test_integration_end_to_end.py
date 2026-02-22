@@ -1006,3 +1006,236 @@ def test_multiple_pulls_unique_records(client, monkeypatch, tmp_path, instant_th
     assert len(lines) == 3
     record_ids = sorted(json.loads(line)["url_link"].split("/")[-1] for line in lines)
     assert record_ids == ["1001", "1002", "1003"]
+
+# ============================================================
+# load_data — malformed date_added (lines 151-156)
+# ============================================================
+
+@pytest.mark.integration
+def test_build_rows_skips_malformed_date(tmp_path, monkeypatch):
+    """Verify ``_build_rows`` skips records with an unparseable ``date_added``.
+
+    Writes an NDJSON file with one valid record and one record whose
+    ``date_added`` cannot be parsed by ``strptime``. Asserts that only
+    the valid record produces a row, and that a warning is printed for
+    the bad record.
+
+    :param tmp_path: Pytest-provided temporary directory.
+    :type tmp_path: pathlib.Path
+    :param monkeypatch: Pytest monkeypatch fixture.
+    """
+    from src.load_data import _build_rows
+
+    ndjson = tmp_path / "data.ndjson"
+    ndjson.write_text(
+        json.dumps({
+            "program": "CS - MIT",
+            "comments": "ok",
+            "date_added": "February 01, 2026",
+            "url_link": "https://fake.com/1",
+            "applicant_status": "Accepted",
+            "start_term": "Fall 2026",
+            "International/US": "US",
+            "gpa": "3.9",
+            "gre_general": "320",
+            "gre_verbal": "160",
+            "gre_analytical_writing": "5.0",
+            "degree_type": "Masters",
+            "llm-generated-program": "CS",
+            "llm-generated-university": "MIT",
+        }) + "\n" +
+        json.dumps({
+            "program": "EE - Stanford",
+            "comments": "bad date",
+            "date_added": "not-a-date",
+            "url_link": "https://fake.com/2",
+            "applicant_status": "Rejected",
+            "start_term": "Fall 2026",
+            "International/US": "US",
+            "gpa": "3.5",
+            "gre_general": "",
+            "gre_verbal": "",
+            "gre_analytical_writing": "",
+            "degree_type": "PhD",
+            "llm-generated-program": None,
+            "llm-generated-university": None,
+        }) + "\n",
+        encoding="utf-8",
+    )
+
+    warnings = []
+    monkeypatch.setattr("builtins.print", lambda msg: warnings.append(msg))
+
+    rows = _build_rows(str(ndjson))
+
+    assert len(rows) == 1, "Only the valid record should produce a row"
+    assert any("Warning" in w and "not-a-date" in w for w in warnings), (
+        "Expected a warning mentioning the malformed date"
+    )
+
+
+# ============================================================
+# refresh_gradcafe — seen_limit early return (line 103)
+# ============================================================
+
+@pytest.mark.integration
+def test_scrape_new_records_seen_limit_early_return(monkeypatch):
+    """Verify ``scrape_new_records`` returns early once 5 consecutive
+    already-seen records are encountered.
+
+    Feeds a single page of 6 records where the first is new and the
+    remaining 5 are already in ``seen_ids``. Asserts that exactly 1
+    new record is returned (the early-return branch on line 103 fires
+    after the 5th consecutive seen record).
+
+    :param monkeypatch: Pytest monkeypatch fixture.
+    """
+    from src.refresh_gradcafe import scrape_new_records
+
+    seen_ids = {200, 201, 202, 203, 204}
+    page_records = [
+        {"result_id": "100"},  # new
+        {"result_id": "200"},  # seen 1
+        {"result_id": "201"},  # seen 2
+        {"result_id": "202"},  # seen 3
+        {"result_id": "203"},  # seen 4
+        {"result_id": "204"},  # seen 5 → triggers return
+    ]
+
+    monkeypatch.setattr("src.refresh_gradcafe.scrape.fetch_html", lambda url: "HTML")
+    monkeypatch.setattr(
+        "src.refresh_gradcafe.scrape.parse_survey_page",
+        lambda html: page_records,
+    )
+
+    result = scrape_new_records(seen_ids)
+
+    assert len(result) == 1
+    assert result[0]["result_id"] == "100"
+
+
+# ============================================================
+# refresh_gradcafe — enrich_with_details future exception (lines 135-136)
+# ============================================================
+
+@pytest.mark.integration
+def test_enrich_with_details_logs_warning_on_failure(monkeypatch):
+    """Verify ``enrich_with_details`` logs a warning when a detail fetch fails.
+
+    Patches ``scrape.scrape_detail_page`` to raise a ``RuntimeError`` for
+    one record. Asserts that:
+
+    - The record is still returned (not dropped).
+    - A warning message is printed mentioning the failed result_id.
+
+    :param monkeypatch: Pytest monkeypatch fixture.
+    """
+    from src.refresh_gradcafe import enrich_with_details
+
+    records = [{"result_id": "999", "program_name": "CS"}]
+
+    monkeypatch.setattr(
+        "src.refresh_gradcafe.scrape.scrape_detail_page",
+        lambda result_id: (_ for _ in ()).throw(RuntimeError("network error")),
+    )
+
+    warnings = []
+    monkeypatch.setattr("builtins.print", lambda msg: warnings.append(str(msg)))
+
+    result = enrich_with_details(records)
+
+    assert len(result) == 1, "Record should be retained even when detail fetch fails"
+    assert any("Warning" in w and "999" in w for w in warnings), (
+        "Expected a warning mentioning the failed result_id"
+    )
+
+
+# ============================================================
+# refresh_gradcafe — write_new_applicant_file JSONDecodeError (line 161)
+# ============================================================
+
+@pytest.mark.integration
+def test_write_new_applicant_file_handles_corrupt_existing_file(tmp_path, monkeypatch):
+    """Verify ``write_new_applicant_file`` handles a corrupt existing staging file.
+
+    Writes invalid JSON to the staging file path, then calls
+    ``write_new_applicant_file``. Asserts that the function completes
+    without raising and that the output file contains only the new records
+    (the corrupt file is treated as if empty).
+
+    :param tmp_path: Pytest-provided temporary directory.
+    :type tmp_path: pathlib.Path
+    :param monkeypatch: Pytest monkeypatch fixture.
+    """
+    corrupt_file = tmp_path / "new_applicants.json"
+    corrupt_file.write_text("this is not valid json", encoding="utf-8")
+    monkeypatch.setattr(rgc, "NEW_APPLICANT_FILE", str(corrupt_file))
+    monkeypatch.setattr("builtins.print", lambda *a, **k: None)
+
+    records = [{
+        "program_name": "History",
+        "university": "Georgetown",
+        "degree_type": "PhD",
+        "comments": "",
+        "date_added": "February 01, 2026",
+        "url_link": "https://fake.com/42",
+        "applicant_status": "Accepted",
+        "start_term": "Fall 2026",
+        "International/US": "US",
+        "gre_general": "",
+        "gre_verbal": "",
+        "gre_analytical_writing": "",
+        "gpa": "3.8",
+    }]
+
+    rgc.write_new_applicant_file(records)
+
+    loaded = json.loads(corrupt_file.read_text(encoding="utf-8"))
+    assert len(loaded) == 1
+    assert loaded[0]["program_name"] == "History"
+
+
+# ============================================================
+# update_data — LLM exception per record (lines 117-123)
+# ============================================================
+
+@pytest.mark.integration
+def test_update_data_llm_failure_sets_fields_to_none(monkeypatch, tmp_path):
+    """Verify ``update_data`` sets LLM fields to ``None`` when ``_call_llm`` raises.
+
+    Patches ``_call_llm`` to raise a ``RuntimeError`` and patches file I/O
+    so no real files are touched. Asserts that:
+
+    - ``processed_count`` is still 1 (the record is not dropped).
+    - ``llm-generated-program`` and ``llm-generated-university`` are ``None``
+      in the written output.
+
+    :param monkeypatch: Pytest monkeypatch fixture.
+    :param tmp_path: Pytest-provided temporary directory.
+    :type tmp_path: pathlib.Path
+    """
+    monkeypatch.setattr(
+        "src.update_data._call_llm",
+        lambda prompt: (_ for _ in ()).throw(RuntimeError("LLM unavailable")),
+    )
+
+    fake_rows = [{"program_name": "CS", "university": "MIT"}]
+    output_file = tmp_path / "llm_output.ndjson"
+    output_file.write_text("", encoding="utf-8")
+    staging_file = tmp_path / "new_applicants.json"
+    staging_file.write_text(json.dumps(fake_rows), encoding="utf-8")
+
+    warnings = []
+    monkeypatch.setattr("builtins.print", lambda msg: warnings.append(str(msg)))
+
+    processed_count = update_data(
+        new_data_path=str(staging_file),
+        llm_output_path=str(output_file),
+    )
+
+    assert processed_count == 1, "Record should still be counted as processed"
+    written = [json.loads(line) for line in output_file.read_text().splitlines() if line]
+    assert len(written) == 1
+    assert written[0]["llm-generated-program"] is None
+    assert written[0]["llm-generated-university"] is None
+    assert any("Warning" in w and "LLM call failed" in w for w in warnings)
