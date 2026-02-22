@@ -1,12 +1,26 @@
+"""
+GradCafe data pipeline entry point.
+
+Orchestrates the full initial data collection flow: scrapes raw applicant
+records from GradCafe, saves them to disk, normalizes them into the final
+schema, and writes the cleaned output to disk.
+"""
+
 # Import cleaning module for normalizing scraped data
 import clean
 
 # Import scraping module for collecting raw GradCafe data
 import scrape
 
-# Define main execution function
-def main():
 
+def main():
+    """Run the full scrape-and-clean pipeline.
+
+    Calls :func:`scrape.scrape_data` to collect raw applicant records,
+    persists the raw data via :func:`scrape.save_data`, normalizes the
+    records into the application schema via :func:`clean.clean_data`, and
+    writes the cleaned output via :func:`clean.save_data`.
+    """
     # Scrape raw applicant records from GradCafe
     raw_records = scrape.scrape_data()
 
@@ -19,6 +33,6 @@ def main():
     # Save cleaned applicant data to disk
     clean.save_data(cleaned)
 
-# Execute main function only when script is run directly
+
 if __name__ == "__main__":
     main()

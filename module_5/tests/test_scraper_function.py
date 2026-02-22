@@ -26,7 +26,7 @@ import json
 import pytest
 from pathlib import Path
 from bs4 import BeautifulSoup
-
+from urllib.error import URLError, HTTPError
 from src.scrape import scrape
 from src.scrape import clean
 
@@ -140,13 +140,7 @@ FAKE_DETAIL_EMPTY = """
 
 @pytest.mark.db
 def test_fetch_html_retry(monkeypatch):
-    """Verify ``_fetch_html`` retries on transient errors and succeeds.
-
-    Simulates two failures followed by a successful response and asserts
-    that the function returns the decoded body after the retries.
-
-    :param monkeypatch: Pytest monkeypatch fixture.
-    """
+    """Verify ``fetch_html`` retries on transient errors and succeeds."""
     attempts = []
 
     class FakeResponse:
@@ -157,12 +151,12 @@ def test_fetch_html_retry(monkeypatch):
     def fake_urlopen(request, timeout):
         if len(attempts) < 2:
             attempts.append(1)
-            raise Exception("Temporary fail")
+            raise URLError("Temporary fail")
         return FakeResponse()
 
     monkeypatch.setattr(scrape.urllib.request, "urlopen", fake_urlopen)
 
-    result = scrape._fetch_html("http://fakeurl")
+    result = scrape.fetch_html("http://fakeurl")
 
     assert result == "OK"
     assert len(attempts) == 2
@@ -170,16 +164,15 @@ def test_fetch_html_retry(monkeypatch):
 
 @pytest.mark.db
 def test_fetch_html_fail(monkeypatch):
-    """Verify ``_fetch_html`` raises after exhausting all retries.
+    """Verify ``fetch_html`` raises after exhausting all retries."""
+    from urllib.error import URLError
 
-    :param monkeypatch: Pytest monkeypatch fixture.
-    """
     monkeypatch.setattr(
         scrape.urllib.request, "urlopen",
-        lambda request, timeout: (_ for _ in ()).throw(Exception("Fail"))
+        lambda request, timeout: (_ for _ in ()).throw(URLError("Fail"))
     )
-    with pytest.raises(Exception):
-        scrape._fetch_html("http://failurl")
+    with pytest.raises(URLError):
+        scrape.fetch_html("http://failurl")
 
 
 # ============================================================
@@ -189,7 +182,7 @@ def test_fetch_html_fail(monkeypatch):
 @pytest.mark.db
 def test_clean_text_none():
     """Verify ``_clean_text`` returns an empty string when passed ``None``."""
-    assert scrape._clean_text(None) == ""
+    assert scrape.clean_text(None) == ""
 
 
 # ============================================================
@@ -206,7 +199,7 @@ def test_extract_undergrad_gpa_zero_values():
     for placeholder in ("0", "0.00"):
         html = f"<dl><div><dt>Undergrad GPA</dt><dd>{placeholder}</dd></div></dl>"
         soup = BeautifulSoup(html, "html.parser")
-        assert scrape._extract_undergrad_gpa(soup) == ""
+        assert scrape.extract_undergrad_gpa(soup) == ""
 
 
 @pytest.mark.db
@@ -228,7 +221,7 @@ def test_extract_undergrad_gpa_placeholder_branch():
     </dl>
     """
     soup = BeautifulSoup(html, "html.parser")
-    assert scrape._extract_undergrad_gpa(soup) == ""
+    assert scrape.extract_undergrad_gpa(soup) == ""
 
 
 # ============================================================
@@ -244,7 +237,7 @@ def test_gre_scores_missing_next_span():
     """
     html = "<span>GRE General:</span>"
     soup = BeautifulSoup(html, "html.parser")
-    scores = scrape._extract_gre_scores(soup)
+    scores = scrape.extract_gre_scores(soup)
     assert scores["gre_general"] == ""
     assert scores["gre_verbal"] == ""
     assert scores["gre_analytical_writing"] == ""
@@ -259,7 +252,7 @@ def test_gre_scores_skip_non_label_span():
     """
     html = "<span>Random text</span><span>0</span>"
     soup = BeautifulSoup(html, "html.parser")
-    scores = scrape._extract_gre_scores(soup)
+    scores = scrape.extract_gre_scores(soup)
     assert scores["gre_general"] == ""
     assert scores["gre_verbal"] == ""
     assert scores["gre_analytical_writing"] == ""
@@ -275,7 +268,7 @@ def test_extract_gre_scores_continue_branch():
     """
     html = "<span>GRE General:</span>"
     soup = BeautifulSoup(html, "html.parser")
-    scores = scrape._extract_gre_scores(soup)
+    scores = scrape.extract_gre_scores(soup)
     assert scores["gre_general"] == ""
     assert scores["gre_verbal"] == ""
     assert scores["gre_analytical_writing"] == ""
@@ -295,8 +288,8 @@ def test_scrape_detail_page(monkeypatch):
 
     :param monkeypatch: Pytest monkeypatch fixture.
     """
-    monkeypatch.setattr(scrape, "_fetch_html", lambda url: FAKE_DETAIL_HTML)
-    result = scrape._scrape_detail_page("FAKE_ID")
+    monkeypatch.setattr(scrape, "fetch_html", lambda url: FAKE_DETAIL_HTML)
+    result = scrape.scrape_detail_page("FAKE_ID")
 
     assert result["program_name"] == "Political Science"
     assert result["degree_type"] == "PhD"
@@ -316,8 +309,8 @@ def test_empty_detail_fields(monkeypatch):
 
     :param monkeypatch: Pytest monkeypatch fixture.
     """
-    monkeypatch.setattr(scrape, "_fetch_html", lambda url: FAKE_DETAIL_EMPTY)
-    result = scrape._scrape_detail_page("FAKE_EMPTY")
+    monkeypatch.setattr(scrape, "fetch_html", lambda url: FAKE_DETAIL_EMPTY)
+    result = scrape.scrape_detail_page("FAKE_EMPTY")
 
     for key in ["program_name", "degree_type", "comments", "gpa",
                 "gre_general", "gre_verbal", "gre_analytical_writing"]:
@@ -346,7 +339,7 @@ def test_parse_survey_page_metadata_assignment_with_main_result():
     <tr><td colspan="4"><div>Fall 2025</div></td></tr>
     <tr><td colspan="4"><div>international</div></td></tr>
     """
-    results = scrape._parse_survey_page(html)
+    results = scrape.parse_survey_page(html)
 
     assert len(results) == 1
     assert results[0]["result_id"] == "FAKE_ID"
@@ -376,7 +369,7 @@ def test_parse_survey_page_skip_no_link():
         <td>Accepted</td>
     </tr>
     """
-    results = scrape._parse_survey_page(html)
+    results = scrape.parse_survey_page(html)
 
     assert len(results) == 1
     assert results[0]["result_id"] == "FAKE_ID"
@@ -413,7 +406,7 @@ def test_scrape_data(monkeypatch, tmp_path):
             return FAKE_SURVEY_HTML
         return FAKE_DETAIL_HTML
 
-    monkeypatch.setattr(scrape, "_fetch_html", fake_fetch)
+    monkeypatch.setattr(scrape, "fetch_html", fake_fetch)
 
     results = scrape.scrape_data()
 
@@ -444,7 +437,7 @@ def test_survey_page_continue_and_metadata(monkeypatch):
 
     :param monkeypatch: Pytest monkeypatch fixture.
     """
-    monkeypatch.setattr(scrape, "_fetch_html", lambda url: FAKE_SURVEY_EMPTY)
+    monkeypatch.setattr(scrape, "fetch_html", lambda url: FAKE_SURVEY_EMPTY)
     monkeypatch.setattr(scrape, "MAX_RECORDS", 1)
 
     results = scrape.scrape_data()
@@ -466,7 +459,7 @@ def test_survey_page_break(monkeypatch):
 
     :param monkeypatch: Pytest monkeypatch fixture.
     """
-    monkeypatch.setattr(scrape, "_fetch_html", lambda url: "<html></html>")
+    monkeypatch.setattr(scrape, "fetch_html", lambda url: "<html></html>")
     monkeypatch.setattr(scrape, "MAX_RECORDS", 1)
 
     assert scrape.scrape_data() == []

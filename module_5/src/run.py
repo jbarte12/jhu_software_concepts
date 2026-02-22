@@ -1,7 +1,22 @@
-from src.app import create_app
-import os
+"""
+Application entry point for the GradCafe Flask application.
+
+Import ``start_app`` to obtain a configured Flask application instance
+for testing or WSGI deployment.
+"""
+
+from .app import create_app
+
 
 def start_app(test_mode=False):
+    """Create and optionally configure the Flask application.
+
+    :param test_mode: If ``True``, applies test configuration overrides
+        and skips starting the development server.
+    :type test_mode: bool
+    :returns: Configured Flask application instance.
+    :rtype: flask.Flask
+    """
     app = create_app()
 
     if test_mode:
@@ -12,12 +27,7 @@ def start_app(test_mode=False):
             "WTF_CSRF_ENABLED": False,
             "SECRET_KEY": "dev",
         })
-
-    if not test_mode:
+    else:
         app.run(use_reloader=False)  # pragma: no cover
 
     return app
-
-if __name__ == "__main__":
-    test_mode = os.environ.get("TEST_MAIN") == "1"
-    start_app(test_mode=test_mode)

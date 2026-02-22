@@ -1,3 +1,10 @@
+"""
+Data cleaning utilities for GradCafe applicant records.
+
+Reads raw scraped JSON, normalizes text fields and applicant status
+values into a consistent schema, and writes the cleaned output to disk.
+"""
+
 # Import JSON utilities
 import json
 
@@ -11,82 +18,93 @@ RAW_FILE = "applicant_data.json"
 OUT_FILE = "applicant_data.json"
 
 
-# Load raw applicant data from disk
 def load_data():
+    """Load raw applicant data from disk.
 
-    # Open raw data file
+    Reads the JSON file at :data:`RAW_FILE` and returns its contents
+    as a Python list.
+
+    :returns: List of raw applicant record dicts.
+    :rtype: list[dict]
+    """
     with open(RAW_FILE, "r", encoding="utf-8") as f:
-
-        # Parse JSON into Python objects
         return json.load(f)
 
 
-# Normalize text values and guarantee string output
 def _norm(value):
+    """Normalize a text value and guarantee string output.
 
-    # Return empty string if value is missing or empty
+    Returns an empty string if the value is ``None`` or falsy, otherwise
+    strips and collapses internal whitespace.
+
+    :param value: Raw string value to normalize, or ``None``.
+    :type value: str or None
+    :returns: Whitespace-normalized string, or ``""`` if value is falsy.
+    :rtype: str
+    """
     if not value:
         return ""
-
-    # Normalize whitespace
     return " ".join(value.split())
 
 
-# Normalize applicant status values and fix decision dates
 def _normalize_status(status):
+    """Normalize an applicant status string into a consistent format.
 
-    # Return empty string if status is missing
+    Applies the following rules in order:
+
+    1. Returns ``""`` if ``status`` is falsy.
+    2. Returns ``"Waitlisted"`` if the status contains ``"wait"``.
+    3. Returns ``"Interview"`` if the status contains ``"interview"``.
+    4. For statuses starting with ``"accepted"`` or ``"rejected"``,
+       extracts the decision word and any day/month date present in the
+       string, returning ``"Decision: D Mon"`` if a date is found or
+       just ``"Decision"`` if not.
+    5. Returns the status unchanged for anything else.
+
+    :param status: Raw applicant status string, or ``None``.
+    :type status: str or None
+    :returns: Normalized status string.
+    :rtype: str
+    """
     if not status:
         return ""
 
-    # Normalize case for matching
     lower = status.lower()
 
-    # Handle waitlist
     if "wait" in lower:
         return "Waitlisted"
 
-    # Handle interview
     if "interview" in lower:
         return "Interview"
 
-    # Handle accepted / rejected with date
     if lower.startswith("accepted") or lower.startswith("rejected"):
-
-        # Extract decision word
         decision = status.split()[0].rstrip(":")
-
-        # Match day + month anywhere in string
         match = re.search(
             r"\b(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b",
             status
         )
-
-        # If no date found, return decision only
         if not match:
             return decision
+        return f"{decision}: {match.group(1)} {match.group(2)}"
 
-        # Extract day and month
-        day = match.group(1)
-        month = match.group(2)
-
-        # Return accepted/rejected in decision: day month form
-        return f"{decision}: {day} {month}"
-
-    # Preserve anything else as-is
     return status
 
 
-# Convert raw records into final schema
 def clean_data(raw_records):
+    """Convert raw scraped records into the final normalized schema.
 
-    # Storage for cleaned records
+    Iterates over ``raw_records``, applying :func:`_norm` to all text
+    fields and :func:`_normalize_status` to the applicant status field.
+
+    :param raw_records: List of raw applicant record dicts as returned
+        by the scraper.
+    :type raw_records: list[dict]
+    :returns: List of cleaned applicant record dicts conforming to the
+        application schema.
+    :rtype: list[dict]
+    """
     cleaned = []
-
-    # Iterate through raw records
     for r in raw_records:
-
-        # Append normalized record
         cleaned.append({
             "program_name": _norm(r.get("program_name")),
             "university": _norm(r.get("university")),
@@ -94,9 +112,7 @@ def clean_data(raw_records):
             "comments": _norm(r.get("comments")),
             "date_added": _norm(r.get("date_added")),
             "url_link": _norm(r.get("url_link")),
-            "applicant_status": _normalize_status(
-                _norm(r.get("applicant_status"))
-            ),
+            "applicant_status": _normalize_status(_norm(r.get("applicant_status"))),
             "start_term": _norm(r.get("start_term")),
             "International/US": _norm(r.get("International/US")),
             "gre_general": _norm(r.get("gre_general")),
@@ -104,19 +120,17 @@ def clean_data(raw_records):
             "gre_analytical_writing": _norm(r.get("gre_analytical_writing")),
             "gpa": _norm(r.get("gpa")),
         })
-
-    # Return cleaned dataset
     return cleaned
 
 
-# Save cleaned applicant data to disk
 def save_data(data):
+    """Save cleaned applicant data to disk as formatted JSON.
 
-    # Open output file
+    Writes ``data`` to :data:`OUT_FILE` and prints a confirmation message.
+
+    :param data: List of cleaned applicant record dicts to save.
+    :type data: list[dict]
+    """
     with open(OUT_FILE, "w", encoding="utf-8") as f:
-
-        # Write formatted JSON
         json.dump(data, f, indent=2, ensure_ascii=False)
-
-    # Confirmation message
     print(f"Cleaned data saved to {OUT_FILE}")

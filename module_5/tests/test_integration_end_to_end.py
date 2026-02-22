@@ -33,6 +33,7 @@ import json
 import os
 import runpy
 from io import StringIO
+import sys
 
 import pytest
 from flask import Flask
@@ -197,15 +198,10 @@ def test_start_app_creates_flask_instance():
 
 @pytest.mark.integration
 def test_run_py_main_block_coverage():
-    """Execute the ``if __name__ == '__main__'`` block in ``run.py``.
-
-    Sets the ``TEST_MAIN`` environment variable so the block exits
-    cleanly, then uses :func:`runpy.run_path` to trigger it.
-    This ensures coverage tools see that branch as executed.
-    """
+    """Execute the ``if __name__ == '__main__'`` block in ``run.py``."""
     os.environ["TEST_MAIN"] = "1"
-    runpy.run_path("src/run.py", run_name="__main__")
-
+    sys.modules.pop("src.run", None)
+    runpy.run_module("src.run", run_name="__main__")
 
 # ============================================================
 # /refresh ENDPOINT
@@ -376,14 +372,14 @@ def test_scrape_new_records_all_branches(
     """
     call_counter = {"i": 0}
 
-    monkeypatch.setattr("src.refresh_gradcafe.scrape._fetch_html", lambda url: "HTML")
+    monkeypatch.setattr("src.refresh_gradcafe.scrape.fetch_html", lambda url: "HTML")
 
     def fake_parse(html):
         idx = call_counter["i"]
         call_counter["i"] += 1
         return page_results_sequence[idx] if idx < len(page_results_sequence) else []
 
-    monkeypatch.setattr("src.refresh_gradcafe.scrape._parse_survey_page", fake_parse)
+    monkeypatch.setattr("src.refresh_gradcafe.scrape.parse_survey_page", fake_parse)
 
     new_records = scrape_new_records(seen_ids)
 
@@ -455,7 +451,7 @@ def test_enrich_with_details_realistic(monkeypatch):
         return detail
 
     monkeypatch.setattr(
-        "src.refresh_gradcafe.scrape._scrape_detail_page", fake_scrape_detail_page
+        "src.refresh_gradcafe.scrape.scrape_detail_page", fake_scrape_detail_page
     )
 
     enriched = enrich_with_details(records)

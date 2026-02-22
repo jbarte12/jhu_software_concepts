@@ -1,3 +1,12 @@
+"""
+LLM enrichment pipeline for GradCafe applicant data.
+
+Reads newly scraped applicant records from the staging file, calls the
+locally hosted LLM to standardize program and university names, appends
+the enriched records to the cumulative NDJSON output file, and clears
+the staging file on completion.
+"""
+
 # Import the json module for reading and writing JSON data
 import json
 
@@ -6,17 +15,28 @@ from .scrape.llm_hosting.app import _call_llm
 
 from .paths import NEW_APPLICANT_FILE, LLM_OUTPUT_FILE
 
-# Define a function to process newly scraped applicant data with the LLM
+
 def update_data(
-
-    # Path to newly scraped, unprocessed data
-    new_data_path= NEW_APPLICANT_FILE,
-
-    # Path to the cumulative LLM-processed output file
+    new_data_path=NEW_APPLICANT_FILE,
     llm_output_path=LLM_OUTPUT_FILE,
 ):
+    """Process newly scraped applicant records through the LLM enrichment pipeline.
 
-    # Log that the update_data function has been called
+    Reads records from ``new_data_path``, calls the LLM once per record to
+    standardize the program and university names, appends each enriched record
+    as a JSON line to ``llm_output_path``, then clears the staging file.
+
+    Returns early with ``0`` if the staging file is missing or empty.
+
+    :param new_data_path: Path to the staging JSON file containing newly
+        scraped, unprocessed applicant records.
+    :type new_data_path: str
+    :param llm_output_path: Path to the cumulative NDJSON file where
+        LLM-enriched records are appended.
+    :type llm_output_path: str
+    :returns: Number of records successfully processed by the LLM.
+    :rtype: int
+    """
     print("update_data() CALLED")
 
     try:
@@ -24,7 +44,6 @@ def update_data(
         with open(new_data_path, "r", encoding="utf-8") as f:
             rows = json.load(f)
     except FileNotFoundError:
-
         # If the staging file does not exist, log and exit early
         print("No new_applicant_data.json found")
         return 0
@@ -39,38 +58,26 @@ def update_data(
 
     # Open the LLM output file in append mode so existing data is preserved
     with open(llm_output_path, "a", encoding="utf-8") as out:
-
-        # Loop over each newly scraped applicant record
         for row in rows:
-
             # Combine program name and university into a single text prompt
-            program_text = f"{row.get('program_name','')}, {row.get('university','')}"
+            program_text = row.get("program_name", "") + ", " + row.get("university", "")
 
             # Call the LLM to standardize program and university names
             result = _call_llm(program_text)
 
-            # Store the LLM-standardized program name back into the record
+            # Store the LLM-standardized fields back into the record
             row["llm-generated-program"] = result.get("standardized_program")
-
-            # Store the LLM-standardized university name back into the record
             row["llm-generated-university"] = result.get("standardized_university")
 
             # Write the enriched record as a single JSON line (NDJSON format)
             out.write(json.dumps(row, ensure_ascii=False) + "\n")
-
-            # Increment the processed record counter
             processed += 1
 
-    # After successful processing, overwrite the staging file with an empty list
-    # This prevents re-processing the same records again
+    # Overwrite the staging file with an empty list to prevent re-processing
     with open(new_data_path, "w", encoding="utf-8") as f:
         json.dump([], f, indent=2)
 
-    # Log completion status and number of processed records
     print(f"LLM analysis complete; processed {processed} records")
-
-    # Log that the staging file has been cleared
     print("new_applicant_data.json cleared")
 
-    # Return the number of records processed
     return processed
