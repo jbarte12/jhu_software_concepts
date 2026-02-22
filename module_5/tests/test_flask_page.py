@@ -154,18 +154,21 @@ def test_grad_cafe_page_renders(client, monkeypatch):
 
 
 @pytest.mark.web
-def test_analysis_page_buttons(app):
+def test_analysis_page_buttons(app, monkeypatch):
     """Verify ``GET /analysis`` renders both action buttons.
 
-    Patches ``get_application_stats`` via the view function globals,
-    parses the response HTML with BeautifulSoup, and asserts that both
-    the "Pull Data" (``btn-refresh``) and "Update Analysis"
-    (``btn-update``) buttons are present.
+    Patches ``get_application_stats`` and ``read_state`` via monkeypatch
+    (rather than mutating module globals directly), parses the response HTML
+    with BeautifulSoup, and asserts that both the "Pull Data" (``btn-refresh``)
+    and "Update Analysis" (``btn-update``) buttons are present.
 
     :param app: Flask application instance.
     :type app: flask.Flask
+    :param monkeypatch: Pytest monkeypatch fixture.
+    :type monkeypatch: pytest.MonkeyPatch
     """
-    app.view_functions["pages.grad_cafe"].__globals__["get_application_stats"] = lambda: FAKE_STATS
+    monkeypatch.setattr("src.app.pages.get_application_stats", lambda: FAKE_STATS)
+    monkeypatch.setattr("src.app.pages.read_state", lambda: FAKE_STATE)
 
     response = app.test_client().get("/analysis")
     assert response.status_code == 200
@@ -176,18 +179,21 @@ def test_analysis_page_buttons(app):
 
 
 @pytest.mark.web
-def test_page_contains_stat_categories_and_values(app):
+def test_page_contains_stat_categories_and_values(app, monkeypatch):
     """Verify ``GET /analysis`` renders at least one stat category alongside its value.
 
-    Patches ``get_application_stats`` and checks the full page text for
-    any matching label/value pair from the expected stat display. This
-    confirms that the template is wiring stat categories to their
-    computed values correctly.
+    Patches ``get_application_stats`` and ``read_state`` via monkeypatch
+    and checks the full page text for any matching label/value pair from
+    the expected stat display. This confirms that the template is wiring
+    stat categories to their computed values correctly.
 
     :param app: Flask application instance.
     :type app: flask.Flask
+    :param monkeypatch: Pytest monkeypatch fixture.
+    :type monkeypatch: pytest.MonkeyPatch
     """
-    app.view_functions["pages.grad_cafe"].__globals__["get_application_stats"] = lambda: FAKE_STATS
+    monkeypatch.setattr("src.app.pages.get_application_stats", lambda: FAKE_STATS)
+    monkeypatch.setattr("src.app.pages.read_state", lambda: FAKE_STATE)
 
     response = app.test_client().get("/analysis")
     assert response.status_code == 200

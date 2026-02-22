@@ -33,6 +33,7 @@ import json
 import pytest
 
 from src.load_data import create_connection, execute_query, rebuild_from_llm_file
+from psycopg import sql
 from src.query_data import get_application_stats
 
 
@@ -40,7 +41,6 @@ from src.query_data import get_application_stats
 # FAKE DATABASE INFRASTRUCTURE
 # ============================================================
 
-@pytest.mark.db
 class FakeCursor:
     """Fake psycopg3 cursor that records executed queries and captured rows.
 
@@ -166,12 +166,16 @@ class FakeConnection:
         """
         return self
 
-    def __exit__(self, *args):
-        """No-op exit for context manager protocol."""
-        pass
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Re-raise any exception that occurred inside the ``with conn:`` block.
+
+        Returning ``False`` tells Python not to suppress the exception,
+        matching the behaviour of a real psycopg3 connection which rolls
+        back and then re-raises on error.
+        """
+        return False  # do not suppress exceptions
 
 
-@pytest.mark.db
 def fake_executemany(cur, sql, rows):
     """Simulate ``cursor.executemany`` by appending rows to the cursor.
 
@@ -188,7 +192,6 @@ def fake_executemany(cur, sql, rows):
     cur.inserted_rows.extend(rows)
 
 
-@pytest.mark.db
 def fake_executemany_unique(cur, sql, rows):
     """Simulate ``cursor.executemany`` with ``ON CONFLICT (url) DO NOTHING`` semantics.
 
@@ -260,14 +263,13 @@ def test_execute_query_records_sql(monkeypatch):
     :param monkeypatch: Pytest monkeypatch fixture.
     """
     conn = FakeConnection()
-    table = "test_empty_table"
 
-    execute_query(conn, f"CREATE TABLE IF NOT EXISTS {table} (id SERIAL PRIMARY KEY, name TEXT);")
-    execute_query(conn, f"TRUNCATE TABLE {table} RESTART IDENTITY;")
+    execute_query(conn, sql.SQL("CREATE TABLE IF NOT EXISTS test_empty_table (id SERIAL PRIMARY KEY, name TEXT);"))
+    execute_query(conn, sql.SQL("TRUNCATE TABLE test_empty_table RESTART IDENTITY;"))
 
     assert conn.cursor_obj.executed_queries == [
-        f"CREATE TABLE IF NOT EXISTS {table} (id SERIAL PRIMARY KEY, name TEXT);",
-        f"TRUNCATE TABLE {table} RESTART IDENTITY;",
+        sql.SQL("CREATE TABLE IF NOT EXISTS test_empty_table (id SERIAL PRIMARY KEY, name TEXT);"),
+        sql.SQL("TRUNCATE TABLE test_empty_table RESTART IDENTITY;"),
     ]
 
 
@@ -601,7 +603,6 @@ from src.query_data import get_application_stats
 # FAKE DATABASE INFRASTRUCTURE
 # ============================================================
 
-@pytest.mark.db
 class FakeCursor:
     """Fake psycopg3 cursor that records executed queries and captured rows.
 
@@ -732,7 +733,6 @@ class FakeConnection:
         pass
 
 
-@pytest.mark.db
 def fake_executemany(cur, sql, rows):
     """Simulate ``cursor.executemany`` by appending rows to the cursor.
 
@@ -749,7 +749,6 @@ def fake_executemany(cur, sql, rows):
     cur.inserted_rows.extend(rows)
 
 
-@pytest.mark.db
 def fake_executemany_unique(cur, sql, rows):
     """Simulate ``cursor.executemany`` with ``ON CONFLICT (url) DO NOTHING`` semantics.
 
@@ -821,14 +820,13 @@ def test_execute_query_records_sql(monkeypatch):
     :param monkeypatch: Pytest monkeypatch fixture.
     """
     conn = FakeConnection()
-    table = "test_empty_table"
 
-    execute_query(conn, f"CREATE TABLE IF NOT EXISTS {table} (id SERIAL PRIMARY KEY, name TEXT);")
-    execute_query(conn, f"TRUNCATE TABLE {table} RESTART IDENTITY;")
+    execute_query(conn, sql.SQL("CREATE TABLE IF NOT EXISTS test_empty_table (id SERIAL PRIMARY KEY, name TEXT);"))
+    execute_query(conn, sql.SQL("TRUNCATE TABLE test_empty_table RESTART IDENTITY;"))
 
     assert conn.cursor_obj.executed_queries == [
-        f"CREATE TABLE IF NOT EXISTS {table} (id SERIAL PRIMARY KEY, name TEXT);",
-        f"TRUNCATE TABLE {table} RESTART IDENTITY;",
+        sql.SQL("CREATE TABLE IF NOT EXISTS test_empty_table (id SERIAL PRIMARY KEY, name TEXT);"),
+        sql.SQL("TRUNCATE TABLE test_empty_table RESTART IDENTITY;"),
     ]
 
 

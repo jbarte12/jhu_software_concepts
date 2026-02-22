@@ -230,7 +230,11 @@ def test_pull_data_exception(monkeypatch, client):
     :param client: Flask test client.
     """
     write_state(pulling_data=False, updating_analysis=False)
-    monkeypatch.setattr("src.app.pages.refresh", lambda: (_ for _ in ()).throw(RuntimeError("Simulated failure")))
+
+    def raise_refresh():
+        raise RuntimeError("Simulated failure")
+
+    monkeypatch.setattr("src.app.pages.refresh", raise_refresh)
 
     response = client.post("/refresh")
 
@@ -303,10 +307,11 @@ def test_update_analysis_exception(monkeypatch, client):
     :param client: Flask test client.
     """
     write_state(pulling_data=False, updating_analysis=False, pull_complete=True)
-    monkeypatch.setattr(
-        "src.app.pages.update_data",
-        lambda: (_ for _ in ()).throw(RuntimeError("Simulated analysis failure"))
-    )
+
+    def raise_update():
+        raise RuntimeError("Simulated analysis failure")
+
+    monkeypatch.setattr("src.app.pages.update_data", raise_update)
     monkeypatch.setattr("src.app.pages.sync_db_from_llm_file", lambda: None)
 
     response = client.post("/update-analysis")

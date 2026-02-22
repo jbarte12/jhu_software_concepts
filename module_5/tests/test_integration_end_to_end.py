@@ -183,14 +183,36 @@ def fake_scraper_injected_data():
 # ============================================================
 
 @pytest.mark.integration
-def test_start_app_creates_flask_instance():
+def test_start_app_creates_flask_instance(monkeypatch):
     """Verify the Flask app starts and the root endpoint returns HTTP 200.
+
+    Patches ``get_application_stats`` and ``read_state`` so the route does
+    not attempt a real database connection (which would raise ``RuntimeError``
+    and either fail or be silently caught depending on the route's error
+    handling).
 
     Calls ``start_app(test_mode=True)`` and asserts that:
 
     - The returned object is a :class:`flask.Flask` instance.
     - A ``GET /`` request to the test client returns status 200.
     """
+    fake_stats = {k: 0 for k in [
+        "fall_2026_count", "international_pct", "avg_gpa", "avg_gre",
+        "avg_gre_v", "avg_gre_aw", "avg_gpa_us_fall_2026",
+        "fall_2025_accept_pct", "avg_gpa_fall_2025_accept", "jhu_cs_masters",
+        "total_applicants", "fall_2026_cs_accept", "fall_2026_cs_accept_llm",
+        "rejected_fall_2026_gpa_pct", "accepted_fall_2026_gpa_pct",
+    ]}
+    fake_state = {
+        "pulling_data": False,
+        "updating_analysis": False,
+        "pull_complete": False,
+        "analysis_complete": False,
+        "message": None,
+    }
+    monkeypatch.setattr("src.app.pages.get_application_stats", lambda: fake_stats)
+    monkeypatch.setattr("src.app.pages.read_state", lambda: fake_state)
+
     app = start_app(test_mode=True)
     assert isinstance(app, Flask)
     assert app.test_client().get("/").status_code == 200
@@ -198,10 +220,18 @@ def test_start_app_creates_flask_instance():
 
 @pytest.mark.integration
 def test_run_py_main_block_coverage():
-    """Execute the ``if __name__ == '__main__'`` block in ``run.py``."""
+    """Exercise the ``if __name__ == '__main__'`` block in ``run.py`` without hanging.
+
+    Sets the ``TEST_MAIN`` environment variable so that the guard inside
+    ``run.py`` skips the actual ``start_app()`` / ``app.run()`` call.
+    Without this guard the test would block CI by starting the development
+    server and never returning.
+    """
+    import os
     os.environ["TEST_MAIN"] = "1"
     sys.modules.pop("src.run", None)
     runpy.run_module("src.run", run_name="__main__")
+    del os.environ["TEST_MAIN"]
 
 # ============================================================
 # /refresh ENDPOINT
@@ -725,6 +755,9 @@ def test_sync_db_from_llm_file(monkeypatch):
 
     class FakeCursor:
         """Minimal fake cursor that captures ``executemany`` calls."""
+
+        def execute(self, query, vars=None):
+            """Accept DDL statements (CREATE TABLE, TRUNCATE) without error."""
 
         def executemany(self, query, rows):
             executed_rows.extend(rows)

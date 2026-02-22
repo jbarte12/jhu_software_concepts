@@ -5,6 +5,8 @@ Import ``start_app`` to obtain a configured Flask application instance
 for testing or WSGI deployment.
 """
 
+import os
+
 from .app import create_app
 
 
@@ -31,3 +33,10 @@ def start_app(test_mode=False):
         app.run(use_reloader=False)  # pragma: no cover
 
     return app
+
+
+if __name__ == "__main__":  # pragma: no cover
+    # The TEST_MAIN environment variable is set by test_run_py_main_block_coverage
+    # to exercise this block without actually starting the dev server.
+    if not os.environ.get("TEST_MAIN"):
+        start_app()

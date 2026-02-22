@@ -228,11 +228,23 @@ def test_percentages_two_decimals(soup_high_precision):
     that Jinja's ``"%.2f"|format(...)`` filter produces the correct
     two-decimal output with a trailing ``%``.
 
+    .. note::
+        The expected values below are **intentionally hardcoded** rather than
+        derived from the fixture constants.  The whole point of this test is
+        to verify rounding behaviour: computing the expected string from the
+        source float would use Python's own ``:.2f``, not Jinja's, and would
+        therefore not catch a template that formatted to the wrong precision.
+        If the fixture floats change, update these expected strings manually
+        to match the correctly-rounded two-decimal representation.
+
     :param soup_high_precision: Parsed HTML rendered with high-precision stats.
     :type soup_high_precision: bs4.BeautifulSoup
     """
-    # Expected values derived from the same high-precision constants used
-    # in the soup_high_precision fixture so they stay in sync automatically.
+    # Expected values derived by hand from the fixture constants:
+    #   45.6789  → "45.68%"   (rounds up)
+    #   78.90123 → "78.90%"   (trailing zero preserved)
+    #   12.3456  → "12.35%"   (rounds up)
+    #   56.789   → "56.79%"   (rounds up)
     expected_percentages = {
         "International Applicants (%):":                    "45.68%",
         "Fall 2025 Acceptance Rate (%):":                   "78.90%",

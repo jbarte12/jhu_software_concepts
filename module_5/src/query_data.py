@@ -323,13 +323,18 @@ def _fetch_averages(connection: Connection) -> dict:
         ``avg_gre_aw``, ``avg_gpa_us_fall_2026``, ``avg_gpa_fall_2025_accept``.
     :rtype: dict
     """
-    # Query average GPA, GRE, GRE Verbal, and GRE Analytical Writing scores
-    avg_gpa, avg_gre, avg_gre_v, avg_gre_aw = fetch_row(
+    # Query average GPA, GRE, GRE Verbal, and GRE Analytical Writing scores.
+    # Guard against an empty table: fetch_row returns None when there are no
+    # rows, which would cause a TypeError on tuple unpacking.
+    averages_row = fetch_row(
         connection,
         """
         SELECT AVG(gpa), AVG(gre), AVG(gre_v), AVG(gre_aw)
         FROM grad_applications;
         """
+    )
+    avg_gpa, avg_gre, avg_gre_v, avg_gre_aw = (
+        averages_row if averages_row is not None else (None, None, None, None)
     )
 
     # Query average GPA for US applicants applying for Fall 2026
@@ -469,6 +474,13 @@ def get_application_stats() -> dict:
     the connection fails, then delegates all query work to
     :func:`_fetch_stats`.
 
+    .. note::
+        This function returns a plain :class:`dict`. Jinja2 supports dot
+        notation on dicts (``stats.avg_gpa``), so templates work correctly.
+        Some test fixtures use :class:`types.SimpleNamespace` for convenience
+        when monkeypatching — both support attribute-style access, but the
+        production return type is always ``dict``.
+
     :returns: Dictionary of computed statistics for the Flask template.
         Contains the following keys: ``fall_2026_count``,
         ``international_pct``, ``avg_gpa``, ``avg_gre``, ``avg_gre_v``,
@@ -480,14 +492,10 @@ def get_application_stats() -> dict:
     :rtype: dict
     :raises RuntimeError: If the database connection could not be established.
     """
-    # Create a connection to the PostgreSQL database
-    connection = create_connection(
-        "sm_app",        # Database name
-        "postgres",      # Database user
-        "abc123",        # Database password
-        "127.0.0.1",     # Database host
-        "5432"           # Database port
-    )
+    # Create a connection to the PostgreSQL database.
+    # Credentials are resolved from environment variables inside
+    # create_connection(); no values are hard-coded here.
+    connection = create_connection()
 
     # Guard against a failed connection before attempting any queries
     if connection is None:

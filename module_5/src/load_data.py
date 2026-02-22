@@ -12,11 +12,17 @@ from datetime import datetime
 # Used to load JSON lines from scraped / LLM files
 import json
 
+# Used to read database credentials from environment variables
+import os
+
 # Used for optional return type annotation on create_connection
 from typing import Optional
 
 # PostgreSQL database adapter for Python (psycopg3)
 import psycopg
+
+# sql module for safe SQL composition — prevents raw string injection
+from psycopg import sql
 
 # Connection used as a typed parameter so Pylint can resolve member access
 # OperationalError used to catch connection failures
@@ -26,40 +32,54 @@ from .paths import LLM_OUTPUT_FILE
 
 
 def create_connection(
-    db_name="sm_app",
-    db_user="postgres",
-    db_password="abc123",
-    db_host="127.0.0.1",
-    db_port="5432"
+    db_name=None,
+    db_user=None,
+    db_password=None,
+    db_host=None,
+    db_port=None,
 ) -> Optional[Connection]:
     """Create and return a psycopg3 connection to the PostgreSQL database.
 
-    Attempts to open a connection using the provided credentials. Returns
-    ``None`` and prints an error message if the connection fails (e.g. the
-    database is unreachable or credentials are wrong).
+    Credentials are resolved from the explicit arguments first; if an
+    argument is ``None``, the corresponding environment variable is used
+    as a fallback (``DB_NAME``, ``DB_USER``, ``DB_PASSWORD``, ``DB_HOST``,
+    ``DB_PORT``). Hard-coded defaults are provided only for non-sensitive
+    values (host, port, db name, user) so the function remains usable
+    without any configuration in local development. Passwords must be
+    supplied via the argument or the ``DB_PASSWORD`` environment variable;
+    no hard-coded password default is provided.
 
     :param db_name: Name of the PostgreSQL database to connect to.
-    :type db_name: str
+    :type db_name: str or None
     :param db_user: PostgreSQL username.
-    :type db_user: str
+    :type db_user: str or None
     :param db_password: PostgreSQL password.
-    :type db_password: str
+    :type db_password: str or None
     :param db_host: Host address of the PostgreSQL server.
-    :type db_host: str
+    :type db_host: str or None
     :param db_port: Port the PostgreSQL server is listening on.
-    :type db_port: str
+    :type db_port: str or None
     :returns: An open psycopg3 connection, or ``None`` on failure.
     :rtype: psycopg.Connection or None
     """
+    # Resolve each credential: explicit argument → env var → safe default.
+    # Passwords are never hard-coded; an empty string is used as the last
+    # resort so psycopg can still attempt a connection (e.g. trust auth).
+    resolved_name = db_name or os.environ.get("DB_NAME", "sm_app")
+    resolved_user = db_user or os.environ.get("DB_USER", "postgres")
+    resolved_password = db_password or os.environ.get("DB_PASSWORD", "")
+    resolved_host = db_host or os.environ.get("DB_HOST", "127.0.0.1")
+    resolved_port = db_port or os.environ.get("DB_PORT", "5432")
+
     try:
-        # Attempt to open a connection to PostgreSQL
-        # Note: psycopg3 uses 'dbname' not 'database'
+        # Attempt to open a connection to PostgreSQL.
+        # Note: psycopg3 uses 'dbname' not 'database'.
         return psycopg.connect(
-            dbname=db_name,
-            user=db_user,
-            password=db_password,
-            host=db_host,
-            port=db_port
+            dbname=resolved_name,
+            user=resolved_user,
+            password=resolved_password,
+            host=resolved_host,
+            port=resolved_port,
         )
     except OperationalError as e:
         # Print error if the connection fails
@@ -67,7 +87,7 @@ def create_connection(
         return None
 
 
-def execute_query(connection, query):
+def execute_query(connection, query: sql.Composable):
     """Execute a single SQL statement without returning results.
 
     Enables autocommit on the connection so changes take effect
@@ -75,18 +95,25 @@ def execute_query(connection, query):
     Intended for DDL statements (``CREATE``, ``TRUNCATE``, etc.)
     and other one-off queries.
 
+    The ``query`` parameter must be a :class:`psycopg.sql.Composable`
+    object (e.g. ``sql.SQL("...")``), not a raw string. This enforces
+    safe SQL composition at every call site and prevents accidental
+    injection via raw string concatenation.
+
+    Example usage::
+
+        execute_query(conn, sql.SQL("TRUNCATE grad_applications RESTART IDENTITY;"))
+
     :param connection: An open psycopg3 database connection.
     :type connection: psycopg.Connection
-    :param query: SQL statement to execute.
-    :type query: str
+    :param query: SQL statement to execute, as a ``sql.Composable`` object.
+    :type query: psycopg.sql.Composable
     """
     # Enable autocommit so changes persist immediately
     connection.autocommit = True
 
-    # Create a database cursor
+    # Create a database cursor and execute the provided SQL query
     cursor = connection.cursor()
-
-    # Execute the provided SQL query
     cursor.execute(query)
 
 
@@ -96,7 +123,9 @@ def _build_rows(path: str) -> list:
     Reads the file at ``path`` line by line, parses each line as JSON, and
     converts each record into a tuple matching the ``grad_applications``
     column order. Numeric fields are cast to ``float`` where present;
-    missing or empty values become ``None``.
+    missing or empty values become ``None``. Records with a malformed
+    ``date_added`` field are logged and skipped rather than crashing the
+    entire load, so one bad line is never fatal.
 
     :param path: Path to the NDJSON file to parse.
     :type path: str or pathlib.Path
@@ -113,6 +142,19 @@ def _build_rows(path: str) -> list:
             # Parse each JSON line into a dictionary
             r = json.loads(line)
 
+            # Parse date string to a DATE object.  Catch malformed dates and
+            # skip the record with a warning rather than crashing the load.
+            date_added = None
+            if r.get("date_added"):
+                try:
+                    date_added = datetime.strptime(r["date_added"], "%B %d, %Y").date()
+                except ValueError:
+                    print(
+                        f"Warning: skipping malformed date_added "
+                        f"'{r['date_added']}' for url {r.get('url_link')}"
+                    )
+                    continue
+
             # Append a tuple representing one DB row
             rows.append(
                 (
@@ -124,9 +166,8 @@ def _build_rows(path: str) -> list:
                     # Free-text applicant comments
                     r.get("comments"),
 
-                    # Convert date string to DATE object
-                    datetime.strptime(r["date_added"], "%B %d, %Y").date()
-                    if r.get("date_added") else None,
+                    # Parsed date (may be None if date_added was absent)
+                    date_added,
 
                     # Application URL (used as unique key)
                     r.get("url_link"),
@@ -167,12 +208,19 @@ def _build_rows(path: str) -> list:
     return rows
 
 
-def _execute_rebuild(conn: Connection, rows: list) -> None:
-    """Execute the full table rebuild inside an already-open connection.
+def _execute_upsert(conn: Connection, rows: list, rebuild: bool) -> None:
+    """Execute a table rebuild or incremental sync inside an already-open connection.
 
-    Creates the ``grad_applications`` table if it does not exist, truncates
-    all existing rows, then bulk-inserts ``rows``. Called by
-    :func:`rebuild_from_llm_file` after the connection is established.
+    When ``rebuild`` is ``True``, creates the ``grad_applications`` table if
+    it does not exist and truncates all existing rows before bulk-inserting
+    ``rows``. When ``rebuild`` is ``False``, performs an incremental sync:
+    inserts only rows whose URL is not already present in the database,
+    via ``ON CONFLICT (url) DO NOTHING``, making it safe to call
+    repeatedly on a growing file.
+
+    This single helper replaces the former ``_execute_rebuild`` /
+    ``_execute_sync`` pair, which were identical apart from the
+    ``TRUNCATE`` call.
 
     Pylint can resolve ``.cursor()`` here because ``conn`` is typed as
     :class:`psycopg.Connection` directly on the parameter.
@@ -181,6 +229,9 @@ def _execute_rebuild(conn: Connection, rows: list) -> None:
     :type conn: psycopg.Connection
     :param rows: Row tuples to insert, as returned by :func:`_build_rows`.
     :type rows: list[tuple]
+    :param rebuild: If ``True``, truncate the table before inserting
+        (full rebuild). If ``False``, perform an incremental upsert.
+    :type rebuild: bool
     """
     with conn.cursor() as cur:
 
@@ -205,11 +256,14 @@ def _execute_rebuild(conn: Connection, rows: list) -> None:
             );
         """)
 
-        # Delete all existing rows and reset the primary key counter
-        cur.execute("TRUNCATE grad_applications RESTART IDENTITY;")
+        if rebuild:
+            # Delete all existing rows and reset the primary key counter
+            cur.execute("TRUNCATE grad_applications RESTART IDENTITY;")
 
         # Bulk insert all rows into the database.
         # psycopg3 uses executemany with explicit %s placeholders per column.
+        # ON CONFLICT (url) DO NOTHING silently skips duplicates for both
+        # the rebuild path (which truncates first) and the sync path.
         cur.executemany(
             """
             INSERT INTO grad_applications (
@@ -219,39 +273,7 @@ def _execute_rebuild(conn: Connection, rows: list) -> None:
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (url) DO NOTHING;
             """,
-            rows
-        )
-
-
-def _execute_sync(conn: Connection, rows: list) -> None:
-    """Execute an incremental insert inside an already-open connection.
-
-    Inserts only rows whose URL is not already present in the database,
-    via ``ON CONFLICT (url) DO NOTHING``. Called by
-    :func:`sync_db_from_llm_file` after the connection is established.
-
-    Pylint can resolve ``.cursor()`` here because ``conn`` is typed as
-    :class:`psycopg.Connection` directly on the parameter.
-
-    :param conn: An open psycopg3 database connection.
-    :type conn: psycopg.Connection
-    :param rows: Row tuples to insert, as returned by :func:`_build_rows`.
-    :type rows: list[tuple]
-    """
-    with conn.cursor() as cur:
-
-        # Insert only new rows (based on unique URL).
-        # psycopg3 uses executemany with explicit %s placeholders per column.
-        cur.executemany(
-            """
-            INSERT INTO grad_applications (
-                program, comments, date_added, url, status, term,
-                us_or_international, gpa, gre, gre_v, gre_aw,
-                degree, llm_generated_program, llm_generated_university
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (url) DO NOTHING;
-            """,
-            rows
+            rows,
         )
 
 
@@ -275,20 +297,17 @@ def rebuild_from_llm_file(path=LLM_OUTPUT_FILE):
     :raises ValueError: If a numeric field (GPA, GRE) contains a
         non-numeric string that cannot be cast to ``float``.
     """
-    # Open a database connection
     conn = create_connection()
 
-    # Guard against a failed connection before attempting cursor access
     if conn is None:
         raise RuntimeError("Failed to connect to the database.")
 
-    # Parse the NDJSON file into row tuples
     rows = _build_rows(path)
 
     # Use context manager: commits on success, rolls back on exception,
-    # and closes the connection automatically
+    # and closes the connection automatically.
     with conn:
-        _execute_rebuild(conn, rows)
+        _execute_upsert(conn, rows, rebuild=True)
 
 
 def sync_db_from_llm_file(path=LLM_OUTPUT_FILE):
@@ -311,17 +330,14 @@ def sync_db_from_llm_file(path=LLM_OUTPUT_FILE):
     :raises ValueError: If a numeric field (GPA, GRE) contains a
         non-numeric string that cannot be cast to ``float``.
     """
-    # Open a database connection
     conn = create_connection()
 
-    # Guard against a failed connection before attempting cursor access
     if conn is None:
         raise RuntimeError("Failed to connect to the database.")
 
-    # Parse the NDJSON file into row tuples
     rows = _build_rows(path)
 
     # Use context manager: commits on success, rolls back on exception,
-    # and closes the connection automatically
+    # and closes the connection automatically.
     with conn:
-        _execute_sync(conn, rows)
+        _execute_upsert(conn, rows, rebuild=False)

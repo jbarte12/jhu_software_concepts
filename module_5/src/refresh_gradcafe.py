@@ -13,8 +13,8 @@ import re
 # Import JSON module for reading and writing JSON data
 import json
 
-# Import ThreadPoolExecutor to run tasks in parallel threads
-from concurrent.futures import ThreadPoolExecutor
+# Import ThreadPoolExecutor and as_completed for parallel detail fetching
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Import public scrape and clean utilities from the scrape module
 from .scrape import scrape, clean
@@ -75,8 +75,11 @@ def scrape_new_records(seen_ids):
     page = 1
     consecutive_seen = 0
 
-    # Stop scraping if this many seen records are found in a row
-    seen_limit = 1
+    # Stop scraping once this many consecutive already-seen records appear.
+    # A value of 1 was too aggressive: a single re-indexed record would halt
+    # the entire scrape.  5 provides a reasonable safety margin while still
+    # preventing unbounded pagination through old data.
+    seen_limit = 5
 
     while True:
         print(f"Scraping survey page {page}")
@@ -107,21 +110,33 @@ def scrape_new_records(seen_ids):
 def enrich_with_details(records):
     """Fetch and merge detail-page data into each record using a thread pool.
 
+    Errors from individual detail-page fetches are caught and logged per
+    record rather than aborting enrichment of all remaining records.
+
     :param records: List of survey-level applicant records to enrich.
     :type records: list[dict]
     :returns: The same list with detail fields merged in-place.
+        Records whose detail fetch failed are left unchanged.
     :rtype: list[dict]
     """
     print(f"Enriching {len(records)} records")
 
     with ThreadPoolExecutor(max_workers=10) as executor:
-        details = executor.map(
-            scrape.scrape_detail_page,
-            [r["result_id"] for r in records],
-        )
+        future_to_record = {
+            executor.submit(scrape.scrape_detail_page, r["result_id"]): r
+            for r in records
+        }
 
-    for record, detail in zip(records, details):
-        record.update(detail)
+        for future in as_completed(future_to_record):
+            record = future_to_record[future]
+            try:
+                detail = future.result()
+                record.update(detail)
+            except Exception as exc:  # pylint: disable=broad-except
+                print(
+                    f"Warning: failed to fetch detail for result_id "
+                    f"{record.get('result_id')}: {exc}"
+                )
 
     return records
 
@@ -129,15 +144,38 @@ def enrich_with_details(records):
 def write_new_applicant_file(records):
     """Clean and write enriched records to the new-applicant staging file.
 
+    Merges the incoming ``records`` with any records that may already exist
+    in the staging file (e.g. from a previous scrape run that was not yet
+    processed by the LLM step), deduplicating on ``url_link``. This prevents
+    a second scrape from silently overwriting unprocessed data.
+
     :param records: List of enriched applicant record dicts.
     :type records: list[dict]
     """
     cleaned = clean.clean_data(records)
 
-    with open(NEW_APPLICANT_FILE, "w", encoding="utf-8") as f:
-        json.dump(cleaned, f, ensure_ascii=False, indent=2)
+    # Load any existing unprocessed records so we don't overwrite them.
+    existing = []
+    try:
+        with open(NEW_APPLICANT_FILE, "r", encoding="utf-8") as f:
+            existing = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
 
-    print(f"Wrote {len(cleaned)} records to new_applicant_data.json")
+    # Merge: existing records first, then new ones; deduplicate on url_link.
+    seen_urls = set()
+    merged = []
+    for record in existing + cleaned:
+        url = record.get("url_link")
+        if url not in seen_urls:
+            seen_urls.add(url)
+            merged.append(record)
+
+    with open(NEW_APPLICANT_FILE, "w", encoding="utf-8") as f:
+        json.dump(merged, f, ensure_ascii=False, indent=2)
+
+    print(f"Wrote {len(cleaned)} records to new_applicant_data.json "
+          f"({len(merged)} total after merge)")
 
 
 def refresh():
