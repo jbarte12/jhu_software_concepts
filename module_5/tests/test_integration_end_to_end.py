@@ -728,46 +728,39 @@ def test_sync_db_from_llm_file(monkeypatch):
     executed_rows = []
 
     class FakeCursor:
-        """Minimal fake cursor that captures ``executemany`` calls.
-
-        psycopg3 calls ``cursor.executemany()`` for bulk inserts instead of
-        the psycopg2 ``execute_values`` helper, so row capture is done here.
-        """
+        """Minimal fake cursor that captures ``executemany`` calls."""
 
         def executemany(self, query, rows):
-            """Capture inserted rows without executing real SQL.
-
-            :param query: SQL query string (unused).
-            :type query: str
-            :param rows: Row tuples to capture.
-            :type rows: list[tuple]
-            """
             executed_rows.extend(rows)
 
         def cursor(self):
-            """Return self to support chained cursor calls."""
             return self
 
         def close(self):
-            """No-op close."""
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
             pass
 
     class FakeConn:
         """Minimal fake psycopg3 connection for sync tests."""
 
         def cursor(self):
-            """Return a :class:`FakeCursor` instance.
-
-            :rtype: FakeCursor
-            """
             return FakeCursor()
 
         def commit(self):
-            """No-op commit."""
             pass
 
         def close(self):
-            """No-op close."""
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
             pass
 
     monkeypatch.setattr("src.load_data.create_connection", lambda: FakeConn())

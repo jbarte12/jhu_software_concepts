@@ -1,4 +1,10 @@
-# src/paths.py
+"""
+Path constants for the GradCafe application.
+
+Defines the base directory and absolute paths to all JSON files used
+by the scraper, LLM enrichment, and database sync pipeline.
+"""
+
 import os
 
 # Base directory pointing to the root src folder

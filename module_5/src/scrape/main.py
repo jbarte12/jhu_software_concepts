@@ -1,8 +1,8 @@
-# Import scraping module for collecting raw GradCafe data
-import scrape
-
 # Import cleaning module for normalizing scraped data
 import clean
+
+# Import scraping module for collecting raw GradCafe data
+import scrape
 
 # Define main execution function
 def main():
